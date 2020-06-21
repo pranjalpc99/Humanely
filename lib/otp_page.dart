@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:math' as math;
 
 import 'config/size_config.dart';
@@ -16,7 +18,134 @@ class OTPPage extends StatefulWidget {
 }
 
 class _OTPPageState extends State<OTPPage> {
+  //TextEditingController controller = TextEditingController();
+  TextEditingController _phoneNumberController = TextEditingController();
+  TextEditingController _otpController = TextEditingController();
 
+  FirebaseUser _firebaseUser;
+  String _status;
+
+  AuthCredential _phoneAuthCredential;
+  String _verificationId;
+  int _code;
+
+  Future<void> _submitPhoneNumber(String number) async {
+    print("in _submitPhoneNumber");
+    /// NOTE: Either append your phone number country code or add in the code itself
+    /// Since I'm in India we use "+91 " as prefix `phoneNumber`
+    String phoneNumber = "+91 " + number.toString().trim();
+    print(phoneNumber);
+
+    /// The below functions are the callbacks, separated so as to make code more redable
+    void verificationCompleted(AuthCredential phoneAuthCredential) {
+      print('verificationCompleted');
+      setState(() {
+        _status += 'verificationCompleted\n';
+      });
+      this._phoneAuthCredential = phoneAuthCredential;
+      print(phoneAuthCredential);
+    }
+
+    void verificationFailed(AuthException error) {
+      print('verificationFailed');
+      setState(() {
+        _status += '$error\n';
+      });
+      print(error);
+    }
+
+    void codeSent(String verificationId, [int code]) {
+      print('codeSent');
+      this._verificationId = verificationId;
+      print(verificationId);
+      this._code = code;
+      print(code.toString());
+      setState(() {
+        _status += 'Code Sent\n';
+      });
+    }
+
+    void codeAutoRetrievalTimeout(String verificationId) {
+      print('codeAutoRetrievalTimeout');
+      setState(() {
+        _status += 'codeAutoRetrievalTimeout\n';
+      });
+      print(verificationId);
+    }
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      /// Make sure to prefix with your country code
+      phoneNumber: phoneNumber,
+
+      /// `seconds` didn't work. The underlying implementation code only reads in `millisenconds`
+      timeout: Duration(milliseconds: 10000),
+
+      /// If the SIM (with phoneNumber) is in the current device this function is called.
+      /// This function gives `AuthCredential`. Moreover `login` function can be called from this callback
+      verificationCompleted: verificationCompleted,
+
+      /// Called when the verification is failed
+      verificationFailed: verificationFailed,
+
+      /// This is called after the OTP is sent. Gives a `verificationId` and `code`
+      codeSent: codeSent,
+
+      /// After automatic code retrival `tmeout` this function is called
+      codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
+    ); // All the callbacks are above
+  }
+
+  void _submitOTP(String otp) {
+    /// get the `smsCode` from the user
+    String smsCode = otp.toString().trim();
+    print("in otp");
+    print(otp);
+
+    /// when used different phoneNumber other than the current (running) device
+    /// we need to use OTP to get `phoneAuthCredential` which is inturn used to signIn/login
+    this._phoneAuthCredential = PhoneAuthProvider.getCredential(
+        verificationId: this._verificationId, smsCode: smsCode);
+
+    _login();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getFirebaseUser();
+  }
+
+  Future<void> _login() async {
+    /// This method is used to login the user
+    /// `AuthCredential`(`_phoneAuthCredential`) is needed for the signIn method
+    /// After the signIn method from `AuthResult` we can get `FirebaserUser`(`_firebaseUser`)
+    try {
+      await FirebaseAuth.instance
+          .signInWithCredential(this._phoneAuthCredential)
+          .then((AuthResult authRes) {
+        _firebaseUser = authRes.user;
+        print(_firebaseUser.toString());
+      });
+      print("signin success");
+//      setState(() {
+//        _status += 'Signed In\n';
+//        print("signin success");
+//      });
+    } catch (e) {
+//      setState(() {
+//        _status += e.toString() + '\n';
+//      });
+      print(e.toString());
+    }
+  }
+
+  Future<void> _getFirebaseUser() async {
+    this._firebaseUser = await FirebaseAuth.instance.currentUser();
+    setState(() {
+      _status =
+      (_firebaseUser == null) ? 'Not Logged In\n' : 'Already LoggedIn\n';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +231,9 @@ class _OTPPageState extends State<OTPPage> {
                   .size
                   .height * 0.05,),
               if(widget.otpstate==false)
-              AddPhoneNumber(),
+              AddPhoneNumber(_phoneNumberController),
               if(widget.otpstate==true)
-              VerifyOTP()
+              VerifyOTP(_otpController)
             ],
           ),
         ),
@@ -115,6 +244,10 @@ class _OTPPageState extends State<OTPPage> {
 }
 
 class VerifyOTP extends StatelessWidget{
+
+  TextEditingController _controller;
+  VerifyOTP(this._controller);
+
   @override
   Widget build(BuildContext context) {
     queryData = MediaQuery.of(context);
@@ -139,22 +272,26 @@ class VerifyOTP extends StatelessWidget{
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: <Widget>[
-                  SizedBox(width: 50.0,),
-                  Transform.rotate(
-                      angle: 270 * math.pi / 180,
-                      child: Icon(Icons.arrow_back_ios,color: Colors.white,)),
                   SizedBox(width: 10.0,),
-                  Text("(+91)", style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18.0,
-                      color: Colors.white
-                  ),),
-                  SizedBox(width: 10.0,),
-                  Text("7506133234", style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18.0,
-                      color: Colors.white
-                  ),),
+//                  Transform.rotate(
+//                      angle: 270 * math.pi / 180,
+//                      child: Icon(Icons.arrow_back_ios,color: Colors.white,)),
+//                  SizedBox(width: 10.0,),
+//                  Text("(+91)", style: TextStyle(
+//                      fontFamily: 'Poppins',
+//                      fontSize: 18.0,
+//                      color: Colors.white
+//                  ),),
+//                  SizedBox(width: 10.0,),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 18.0,
+                        color: Colors.white
+                    ),),
+                  ),
                 ],
               ),
             ),
@@ -177,7 +314,9 @@ class VerifyOTP extends StatelessWidget{
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   InkWell(
-                    onTap: (){},
+                    onTap: (){
+                      _OTPPageState()._submitOTP(_controller.text);
+                    },
                     child: Ink(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
@@ -227,6 +366,11 @@ class VerifyOTP extends StatelessWidget{
 
 class AddPhoneNumber extends StatelessWidget{
 
+  TextEditingController _controller;
+  AddPhoneNumber(this._controller);
+
+  //_OTPPageState __otpPageState = new _OTPPageState();
+
   @override
   Widget build(BuildContext context) {
     queryData = MediaQuery.of(context);
@@ -262,11 +406,15 @@ class AddPhoneNumber extends StatelessWidget{
                       color: Colors.white
                   ),),
                   SizedBox(width: 10.0,),
-                  Text("7506133234", style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18.0,
-                      color: Colors.white
-                  ),),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 18.0,
+                        color: Colors.white
+                    ),),
+                  ),
                 ],
               ),
             ),
@@ -290,7 +438,10 @@ class AddPhoneNumber extends StatelessWidget{
                 children: <Widget>[
                   InkWell(
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => OTPPage(true,"7506133234")));
+                      //__otpPageState.verifyPhone();
+                      _OTPPageState()._submitPhoneNumber(_controller.text);
+                      //print(_controller.text);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => OTPPage(true,_controller.text)));
                     },
                     child: Ink(
                       decoration: BoxDecoration(

@@ -76,10 +76,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Ink(
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10.0),
-                          gradient: LinearGradient(colors: [
-                            Color(0xFF2B79E6),
-                            Color(0xFF7CB4FF)
-                          ])),
+                          color: Colors.blue,
+//                          gradient: LinearGradient(colors: [
+//                            Color(0xFF2B79E6),
+//                            Color(0xFF7CB4FF)
+//                          ])
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.only(
                             left: 50.0,
