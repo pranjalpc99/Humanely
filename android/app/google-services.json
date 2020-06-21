@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "653678926864",
+    "firebase_url": "https://humanely-340e4.firebaseio.com",
+    "project_id": "humanely-340e4",
+    "storage_bucket": "humanely-340e4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653678926864:android:0150284c0d208f5c0cfe95",
+        "android_client_info": {
+          "package_name": "com.tachyon.techlabs.humanely"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653678926864-pdhcphjh1sfvdgqvtb6sqiht9kn0gqlk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tachyon.techlabs.humanely",
+            "certificate_hash": "bbc6d0b5ce1ddb52759c4267b128c288d25f9ccd"
+          }
+        },
+        {
+          "client_id": "653678926864-grd9tjhp6ljs4vsl5fd2q0096qih1vp0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBt3Z24SyOdKXgDsOt-zwkiS14639os0Kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653678926864-grd9tjhp6ljs4vsl5fd2q0096qih1vp0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
