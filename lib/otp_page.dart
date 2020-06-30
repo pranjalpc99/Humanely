@@ -1,13 +1,16 @@
+import 'package:Humanely/home_page.dart';
+import 'package:Humanely/user_register.dart';
+import 'package:Humanely/utils/size_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
-
-import 'config/size_config.dart';
 
 
 MediaQueryData queryData;
+String phone;
 
 class OTPPage extends StatefulWidget {
   final bool otpstate;
@@ -35,15 +38,22 @@ class _OTPPageState extends State<OTPPage> {
     /// Since I'm in India we use "+91 " as prefix `phoneNumber`
     String phoneNumber = "+91 " + number.toString().trim();
     print(phoneNumber);
+    phone = phoneNumber;
 
     /// The below functions are the callbacks, separated so as to make code more redable
     void verificationCompleted(AuthCredential phoneAuthCredential) {
       print('verificationCompleted');
+      this._phoneAuthCredential = phoneAuthCredential;
+      print("phoneAuth");
+      print(phoneAuthCredential);
+      _login();
       setState(() {
         _status += 'verificationCompleted\n';
       });
-      this._phoneAuthCredential = phoneAuthCredential;
-      print(phoneAuthCredential);
+//      this._phoneAuthCredential = phoneAuthCredential;
+//      print("phoneAuth");
+//      print(phoneAuthCredential);
+//      _login();
     }
 
     void verificationFailed(AuthException error) {
@@ -56,7 +66,7 @@ class _OTPPageState extends State<OTPPage> {
 
     void codeSent(String verificationId, [int code]) {
       print('codeSent');
-      this._verificationId = verificationId;
+      _verificationId = verificationId;
       print(verificationId);
       this._code = code;
       print(code.toString());
@@ -104,7 +114,7 @@ class _OTPPageState extends State<OTPPage> {
     /// when used different phoneNumber other than the current (running) device
     /// we need to use OTP to get `phoneAuthCredential` which is inturn used to signIn/login
     this._phoneAuthCredential = PhoneAuthProvider.getCredential(
-        verificationId: this._verificationId, smsCode: smsCode);
+        verificationId: _verificationId, smsCode: smsCode);
 
     _login();
   }
@@ -119,6 +129,7 @@ class _OTPPageState extends State<OTPPage> {
     /// This method is used to login the user
     /// `AuthCredential`(`_phoneAuthCredential`) is needed for the signIn method
     /// After the signIn method from `AuthResult` we can get `FirebaserUser`(`_firebaseUser`)
+    print(_verificationId);
     try {
       await FirebaseAuth.instance
           .signInWithCredential(this._phoneAuthCredential)
@@ -127,6 +138,7 @@ class _OTPPageState extends State<OTPPage> {
         print(_firebaseUser.toString());
       });
       print("signin success");
+      Navigator.push(context, MaterialPageRoute(builder: (context) => UserRegister()));
 //      setState(() {
 //        _status += 'Signed In\n';
 //        print("signin success");
@@ -144,6 +156,13 @@ class _OTPPageState extends State<OTPPage> {
     setState(() {
       _status =
       (_firebaseUser == null) ? 'Not Logged In\n' : 'Already LoggedIn\n';
+      if(_firebaseUser == null)
+        print("Not logged in");
+      else{
+        print("Already logged in");
+        Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+      }
+
     });
   }
 
@@ -161,80 +180,82 @@ class _OTPPageState extends State<OTPPage> {
     return Scaffold(
       backgroundColor: Color(0xff060606),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.arrow_back_ios),
-                    color: Colors.blue,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  InkWell(
-                    onTap: (){Navigator.pop(context);},
-                    child: Text(
-                      'Back',
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 20.0),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.arrow_back_ios),
+                      color: Colors.blue,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                  )
-                ],
-              ),
-              SizedBox(height: 30.0,),
-              Container(
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.2,
-                  child: Image.asset('assets/images/otp_img.png')),
-              SizedBox(height: 50.0,),
-              Text('OTP VERIFICATION',
-                style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  fontSize: SizeConfig.safeBlockHorizontal*6,
-                ),),
-              if(widget.otpstate==false)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Please enter your mobile number to verify your account',
+                    InkWell(
+                      onTap: (){Navigator.pop(context);},
+                      child: Text(
+                        'Back',
+                        style: TextStyle(
+                            color: Colors.blue,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20.0),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 30.0,),
+                Container(
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.2,
+                    child: Image.asset('assets/images/otp_img.png')),
+                SizedBox(height: 50.0,),
+                Text('OTP VERIFICATION',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w100,
-                    color: Colors.white,
-                    fontSize: SizeConfig.safeBlockHorizontal*3.5,
-                  ),
-                  textAlign: TextAlign.center,),
-              ),
-              if(widget.otpstate==true)
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    fontSize: SizeConfig.safeBlockHorizontal*6,
+                  ),),
+                if(widget.otpstate==false)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('We have sent and OTP to '+widget.number,
+                  child: Text('Please enter your mobile number to verify your account',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w100,
                       color: Colors.white,
-                      fontSize: SizeConfig.safeBlockHorizontal*4,
+                      fontSize: SizeConfig.safeBlockHorizontal*3.5,
                     ),
                     textAlign: TextAlign.center,),
                 ),
-              SizedBox(height: MediaQuery
-                  .of(context)
-                  .size
-                  .height * 0.05,),
-              if(widget.otpstate==false)
-              AddPhoneNumber(_phoneNumberController),
-              if(widget.otpstate==true)
-              VerifyOTP(_otpController)
-            ],
+                if(widget.otpstate==true)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('We have sent and OTP to '+widget.number,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w100,
+                        color: Colors.white,
+                        fontSize: SizeConfig.safeBlockHorizontal*4,
+                      ),
+                      textAlign: TextAlign.center,),
+                  ),
+                SizedBox(height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * 0.05,),
+                if(widget.otpstate==false)
+                AddPhoneNumber(_phoneNumberController),
+                if(widget.otpstate==true)
+                VerifyOTP(_otpController)
+              ],
+            ),
           ),
         ),
       ),
@@ -247,6 +268,12 @@ class VerifyOTP extends StatelessWidget{
 
   TextEditingController _controller;
   VerifyOTP(this._controller);
+
+  getPhoneNumber() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String num = preferences.getString("phoneNumber");
+    return num;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +296,7 @@ class VerifyOTP extends StatelessWidget{
               side: BorderSide(color: Colors.blue),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(4.0),
               child: Row(
                 children: <Widget>[
                   SizedBox(width: 10.0,),
@@ -285,6 +312,15 @@ class VerifyOTP extends StatelessWidget{
 //                  SizedBox(width: 10.0,),
                   Expanded(
                     child: TextField(
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.all(0),
+                      ),
                       controller: _controller,
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -315,6 +351,8 @@ class VerifyOTP extends StatelessWidget{
                 children: <Widget>[
                   InkWell(
                     onTap: (){
+                      print(_controller.text);
+                      //String num =  getPhoneNumber();
                       _OTPPageState()._submitOTP(_controller.text);
                     },
                     child: Ink(
@@ -350,12 +388,18 @@ class VerifyOTP extends StatelessWidget{
               fontSize: SizeConfig.safeBlockHorizontal*3.5,
             ),),
             SizedBox(width: 50.0,),
-            Text('RESEND OTP',style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
-                color: Colors.green,
-              fontSize: SizeConfig.safeBlockHorizontal*3.5,
-            ),)
+            InkWell(
+              onTap: (){
+                //phone = _controller.text;
+                _OTPPageState()._submitPhoneNumber(phone);
+                },
+              child: Text('RESEND OTP',style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.green,
+                fontSize: SizeConfig.safeBlockHorizontal*3.5,
+              ),),
+            )
           ],
         )
       ],
@@ -368,6 +412,12 @@ class AddPhoneNumber extends StatelessWidget{
 
   TextEditingController _controller;
   AddPhoneNumber(this._controller);
+
+  savePhoneNumber(String number) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String num = number;
+    preferences.setString("phoneNumber", num);
+  }
 
   //_OTPPageState __otpPageState = new _OTPPageState();
 
@@ -392,7 +442,7 @@ class AddPhoneNumber extends StatelessWidget{
               side: BorderSide(color: Colors.blue),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: <Widget>[
                   SizedBox(width: 50.0,),
@@ -408,6 +458,16 @@ class AddPhoneNumber extends StatelessWidget{
                   SizedBox(width: 10.0,),
                   Expanded(
                     child: TextField(
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.all(0),
+                      ),
                       controller: _controller,
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -439,6 +499,7 @@ class AddPhoneNumber extends StatelessWidget{
                   InkWell(
                     onTap: (){
                       //__otpPageState.verifyPhone();
+                      savePhoneNumber(_controller.text);
                       _OTPPageState()._submitPhoneNumber(_controller.text);
                       //print(_controller.text);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => OTPPage(true,_controller.text)));
