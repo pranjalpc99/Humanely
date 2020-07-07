@@ -1,6 +1,15 @@
 import 'dart:async';
+import 'package:Humanely/main.dart';
+
+//import 'package:Humanely/notch_shape.dart';
 import 'package:Humanely/providers/place_provider.dart';
 import 'package:Humanely/src/utils/uuid.dart';
+import 'package:Humanely/utils/hexcolor.dart';
+import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+
+//import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart' as am;
+//import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -70,6 +79,7 @@ class PlacePicker extends StatefulWidget {
 
   final String hintText;
   final String searchingText;
+
   // final double searchBarHeight;
   // final EdgeInsetsGeometry contentPadding;
 
@@ -159,7 +169,19 @@ class PlacePicker extends StatefulWidget {
   _PlacePickerState createState() => _PlacePickerState();
 }
 
-class _PlacePickerState extends State<PlacePicker> {
+class _PlacePickerState extends State<PlacePicker>
+    with SingleTickerProviderStateMixin {
+  FirebaseUser _firebaseUser;
+  String _status;
+  var _bottomNavIndex = 0; //default index of first screen
+
+  AnimationController _animationController;
+  Animation<double> animation;
+  CurvedAnimation curve;
+
+  FloatingActionButtonLocation floatingActionButtonLocation = FloatingActionButtonLocation.centerDocked;
+  MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
+
   GlobalKey appBarKey = GlobalKey();
   PlaceProvider provider;
 
@@ -168,13 +190,61 @@ class _PlacePickerState extends State<PlacePicker> {
   @override
   void initState() {
     super.initState();
+    _getFirebaseUser();
 
     provider =
         PlaceProvider(widget.apiKey, widget.proxyBaseUrl, widget.httpClient);
     provider.sessionToken = Uuid().generateV4();
     provider.desiredAccuracy = widget.desiredLocationAccuracy;
     provider.setMapType(widget.initialMapType);
+
+    _animationController = AnimationController(
+      duration: Duration(seconds: 1),
+      vsync: this,
+    );
+    curve = CurvedAnimation(
+      parent: _animationController,
+      curve: Interval(
+        0.5,
+        1.0,
+        curve: Curves.fastOutSlowIn,
+      ),
+    );
+    animation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(curve);
+
+    Future.delayed(
+      Duration(seconds: 1),
+      () => _animationController.forward(),
+    );
   }
+
+  Future<void> _getFirebaseUser() async {
+    this._firebaseUser = await FirebaseAuth.instance.currentUser();
+    setState(() {
+      _status =
+          (_firebaseUser == null) ? 'Not Logged In\n' : 'Already LoggedIn\n';
+      if (_firebaseUser == null) {
+        print("Not logged in");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    MyHomePage(title: 'Flutter Demo Home Page')));
+      } else {
+        print("Already logged in");
+      }
+    });
+  }
+
+  final iconList = <IconData>[
+    Icons.home,
+    Icons.flash_on,
+    Icons.notifications,
+    Icons.person,
+  ];
 
   @override
   void dispose() {
@@ -193,28 +263,90 @@ class _PlacePickerState extends State<PlacePicker> {
           value: provider,
           child: Builder(
             builder: (context) {
-              return Scaffold(
-                resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-                extendBodyBehindAppBar: true,
-                appBar: AppBar(
-                  key: appBarKey,
-                  automaticallyImplyLeading: false,
-                  iconTheme: Theme.of(context).iconTheme,
-                  elevation: 0,
-                  backgroundColor: Colors.transparent,
-                  titleSpacing: 0.0,
-                  title: _buildSearchBar(),
-                ),
-                body: _buildMapWithLocation(),
+              return Stack(
+                children: <Widget>[
+                  Scaffold(
+                    backgroundColor: Colors.transparent,
+                    resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+                    extendBodyBehindAppBar: true,
+                    extendBody: true,
+                    appBar: AppBar(
+                      key: appBarKey,
+                      automaticallyImplyLeading: false,
+                      iconTheme: Theme.of(context).iconTheme,
+                      elevation: 0,
+                      backgroundColor: Colors.transparent,
+                      titleSpacing: 0.0,
+                      title: _buildSearchBar(),
+                    ),
+                    body: _buildMapWithLocation(),
+                    floatingActionButton: FloatingActionButton(
+                      onPressed: () {},
+                      child: Icon(Icons.add),
+                    ),
+                    floatingActionButtonLocation:
+                        FloatingActionButtonLocation.centerDocked,
+                    bottomNavigationBar : AnimatedBottomNavigationBar(
+                      icons: iconList,
+                  backgroundColor: HexColor('#444444'),
+                  activeIndex: _bottomNavIndex,
+                  leftCornerRadius: 24,
+                  rightCornerRadius: 24,
+                  gapLocation: GapLocation.center,
+                  notchSmoothness: NotchSmoothness.defaultEdge,
+                  notchAndCornersAnimation: animation,
+                  notchMargin: 8.0,
+                  onTap: (index) => setState(() => _bottomNavIndex = index),
+                    ),
+                  ),
+                ],
               );
             },
           ),
         ));
   }
 
+//  Widget _buildBottomTab() {
+//    return BottomAppBar(
+//      shape: CircularNotchedAndCorneredRect(
+//          leftCornerRadius: 24,
+//          rightCornerRadius: 24,
+//          notchSmoothness: NotchSmoothnessValue.smoothEdge),
+//      color: HexColor('#444444'),
+//      child: Row(
+//        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//        children: _buildItems(),
+//      ),
+//    );
+//  }
+
+//
+//  Widget _buildBottomTabContainer(){
+//    return BottomAppBar(
+//      shape: CircularNotchedAndCorneredRect(
+//          leftCornerRadius: 24,
+//          rightCornerRadius: 24,
+//          notchSmoothness: NotchSmoothness.smoothEdge
+//      ),
+//      color: HexColor('#444444'),
+//      child: Row(
+//        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//        children: <Widget>[
+//          TabItem(icon: Icons.home,),
+//          TabItem(icon: Icons.flash_on,),
+//          SizedBox(width: 48,),
+//          TabItem(icon: Icons.notifications,),
+//          TabItem(icon: Icons.person,)
+//        ],
+//      ),
+//    );
+//  }
+
   Widget _buildSearchBar() {
-    return Row(
-      children: <Widget>[
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+      child: Row(
+        children: <Widget>[
 //        widget.automaticallyImplyAppBarLeading
 //            ? IconButton(
 //                onPressed: () => Navigator.maybePop(context),
@@ -223,36 +355,39 @@ class _PlacePickerState extends State<PlacePicker> {
 //                ),
 //                padding: EdgeInsets.zero)
 //            : SizedBox(width: 15),
-        SizedBox(width: 15.0,),
-        Expanded(
-          child: AutoCompleteSearch(
-            appBarKey: appBarKey,
-            searchBarController: searchBarController,
-            sessionToken: provider.sessionToken,
-            hintText: widget.hintText,
-            searchingText: widget.searchingText,
-            debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
-            onPicked: (prediction) {
-              _pickPrediction(prediction);
-            },
-            onSearchFailed: (status) {
-              if (widget.onAutoCompleteFailed != null) {
-                widget.onAutoCompleteFailed(status);
-              }
-            },
-            autocompleteOffset: widget.autocompleteOffset,
-            autocompleteRadius: widget.autocompleteRadius,
-            autocompleteLanguage: widget.autocompleteLanguage,
-            autocompleteComponents: widget.autocompleteComponents,
-            autocompleteTypes: widget.autocompleteTypes,
-            strictbounds: widget.strictbounds,
-            region: widget.region,
-            initialSearchString: widget.initialSearchString,
-            searchForInitialValue: widget.searchForInitialValue,
+          SizedBox(
+            width: 15.0,
           ),
-        ),
-        SizedBox(width: 5),
-      ],
+          Expanded(
+            child: AutoCompleteSearch(
+              appBarKey: appBarKey,
+              searchBarController: searchBarController,
+              sessionToken: provider.sessionToken,
+              hintText: widget.hintText,
+              searchingText: widget.searchingText,
+              debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
+              onPicked: (prediction) {
+                _pickPrediction(prediction);
+              },
+              onSearchFailed: (status) {
+                if (widget.onAutoCompleteFailed != null) {
+                  widget.onAutoCompleteFailed(status);
+                }
+              },
+              autocompleteOffset: widget.autocompleteOffset,
+              autocompleteRadius: widget.autocompleteRadius,
+              autocompleteLanguage: widget.autocompleteLanguage,
+              autocompleteComponents: widget.autocompleteComponents,
+              autocompleteTypes: widget.autocompleteTypes,
+              strictbounds: widget.strictbounds,
+              region: widget.region,
+              initialSearchString: widget.initialSearchString,
+              searchForInitialValue: widget.searchForInitialValue,
+            ),
+          ),
+          SizedBox(width: 5),
+        ],
+      ),
     );
   }
 
@@ -377,3 +512,4 @@ class _PlacePickerState extends State<PlacePicker> {
     );
   }
 }
+

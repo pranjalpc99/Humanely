@@ -106,11 +106,11 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
             ? Colors.black54
             : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        elevation: 8.0,
+        //elevation: 8.0,
         child: Row(
           children: <Widget>[
             SizedBox(width: 10),
-            Icon(Icons.search,color: Colors.white,),
+            Icon(Icons.search,color: Colors.white60,),
             SizedBox(width: 10),
             Expanded(child: _buildSearchTextField()),
             _buildTextClearIcon(),
@@ -122,6 +122,9 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
 
   Widget _buildSearchTextField() {
     return TextField(
+      style: TextStyle(
+        color: Colors.white
+      ),
       controller: controller,
       focusNode: focus,
       decoration: InputDecoration(
@@ -148,7 +151,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
                   Icons.clear,
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
-                      : Colors.black,
+                      : Colors.white60,
                 ),
                 onTap: () {
                   clearText();
@@ -237,6 +240,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
 
   Widget _buildSearchingOverlay() {
     return Container(
+      color: Color(0xff444444),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
       child: Row(
         children: <Widget>[
@@ -249,7 +253,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
           Expanded(
             child: Text(
               widget.searchingText ?? "Searching...",
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16,color: Colors.white),
             ),
           )
         ],

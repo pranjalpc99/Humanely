@@ -167,16 +167,8 @@ class GoogleMapPlacePicker extends StatelessWidget {
     return await rootBundle.loadString(path);
   }
 
-  void setMapStyle(String mapStyle){
-    
-  }
-
   @override
   Widget build(BuildContext context) {
-
-    rootBundle.loadString('assets/map_style.txt').then((string) {
-      _mapStyle = string;
-    });
 
     return Stack(
       children: <Widget>[
@@ -434,21 +426,21 @@ class GoogleMapPlacePicker extends StatelessWidget {
       right: 15,
       child: Column(
         children: <Widget>[
-          enableMapTypeButton
-              ? Container(
-            width: 35,
-            height: 35,
-            child: RawMaterialButton(
-              shape: CircleBorder(),
-              fillColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black54
-                  : Colors.white,
-              elevation: 8.0,
-              onPressed: onToggleMapType,
-              child: Icon(Icons.layers),
-            ),
-          )
-              : Container(),
+//          enableMapTypeButton
+//              ? Container(
+//            width: 35,
+//            height: 35,
+//            child: RawMaterialButton(
+//              shape: CircleBorder(),
+//              fillColor: Theme.of(context).brightness == Brightness.dark
+//                  ? Colors.black54
+//                  : Colors.white,
+//              elevation: 8.0,
+//              onPressed: onToggleMapType,
+//              child: Icon(Icons.layers),
+//            ),
+//          )
+//              : Container(),
           SizedBox(height: 10),
           enableMyLocationButton
               ? Container(
@@ -458,7 +450,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
               shape: CircleBorder(),
               fillColor: Theme.of(context).brightness == Brightness.dark
                   ? Colors.black54
-                  : Colors.white,
+                  : Colors.white60,
               elevation: 8.0,
               onPressed: onMyLocation,
               child: Icon(Icons.my_location),

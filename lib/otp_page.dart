@@ -29,7 +29,7 @@ class _OTPPageState extends State<OTPPage> {
   String _status;
 
   AuthCredential _phoneAuthCredential;
-  String _verificationId;
+  static String _verificationId;
   int _code;
 
   Future<void> _submitPhoneNumber(String number) async {

@@ -1,5 +1,8 @@
+import 'package:Humanely/google_maps_place_picker.dart';
 import 'package:Humanely/home_page.dart';
+import 'package:Humanely/utils/credentials.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'otp_page.dart';
 
@@ -8,6 +11,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  static final kInitialPosition = LatLng(19.124573, 72.837319);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,7 +24,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      home: PlacePicker(
+        apiKey: PLACES_API,
+        useCurrentLocation: true,
+        initialPosition: kInitialPosition,
+      ),
     );
   }
 }
