@@ -1,7 +1,13 @@
+
+import 'package:Humanely/fragments/explore.dart';
 import 'package:Humanely/google_maps_place_picker.dart';
 import 'package:Humanely/main.dart';
+import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/fragments/demo.dart';
+
 import 'package:Humanely/user_register.dart';
 import 'package:Humanely/utils/credentials.dart';
+import 'package:Humanely/utils/hexcolor.dart';
+import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,17 +18,45 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
 
   static final kInitialPosition = LatLng(19.124573, 72.837319);
 
   FirebaseUser _firebaseUser;
   String _status;
 
+  var _bottomNavIndex = 0; //default index of first screen
+
+  AnimationController _animationController;
+  Animation<double> animation;
+  CurvedAnimation curve;
+
   @override
   void initState() {
     super.initState();
     _getFirebaseUser();
+
+    _animationController = AnimationController(
+      duration: Duration(seconds: 1),
+      vsync: this,
+    );
+    curve = CurvedAnimation(
+      parent: _animationController,
+      curve: Interval(
+        0.5,
+        1.0,
+        curve: Curves.fastOutSlowIn,
+      ),
+    );
+    animation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(curve);
+
+    Future.delayed(
+      Duration(seconds: 1),
+          () => _animationController.forward(),
+    );
   }
 
   Future<void> _getFirebaseUser() async {
@@ -37,36 +71,77 @@ class _HomePageState extends State<HomePage> {
       else{
         print("Already logged in");
         print(PLACES_API);
-        Navigator.push(context, MaterialPageRoute(builder: (context) =>
-            PlacePicker(
-              apiKey: PLACES_API,
-              useCurrentLocation: true,
-              initialPosition: kInitialPosition,
-            )));
+//        Navigator.push(context, MaterialPageRoute(builder: (context) =>
+//            PlacePicker(
+//              apiKey: PLACES_API,
+//              useCurrentLocation: true,
+//              initialPosition: kInitialPosition,
+//            )));
       }
 
     });
   }
+
+
+  final iconList = <IconData>[
+    Icons.home,
+    Icons.flash_on,
+    Icons.notifications,
+    Icons.person,
+  ];
 
   @override
   Widget build(BuildContext context) {
     double defaultScreenWidth = 400.0;
     double defaultScreenHeight = 810.0;
     ScreenUtil.init(width: defaultScreenWidth,height: defaultScreenHeight,allowFontScaling: true);
+    Widget child;
+    switch (_bottomNavIndex) {
+      case 0:
+        child = PlacePicker(
+        apiKey: PLACES_API,
+        useCurrentLocation: true,
+        initialPosition: kInitialPosition,
+      );
+        break;
+      case 1:
+        child = Explore();
+        break;
+      case 2:
+        child = WrapWidgetDemo();
+        break;
+      case 3:
+        child = FlutterLogo();
+        break;
+    }
 
-    return Scaffold(
-      backgroundColor: Color(0xff060606),
-      body: SafeArea(
-        child: Container(
-          child: Center(
-            child: Text("Home Page",
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Poppins',
-              fontSize: 22.0
-            ),),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Color(0xff060606),
+          extendBodyBehindAppBar: true,
+          extendBody: true,
+          body: SizedBox.expand(child: child),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: Icon(Icons.add),
           ),
-        ),
+          floatingActionButtonLocation:
+          FloatingActionButtonLocation.centerDocked,
+          bottomNavigationBar : AnimatedBottomNavigationBar(
+            icons: iconList,
+            backgroundColor: HexColor('#444444'),
+            activeIndex: _bottomNavIndex,
+            leftCornerRadius: 24,
+            rightCornerRadius: 24,
+            gapLocation: GapLocation.center,
+            notchSmoothness: NotchSmoothness.defaultEdge,
+            notchAndCornersAnimation: animation,
+            notchMargin: 8.0,
+            onTap: (index) => setState(() {
+              _bottomNavIndex = index;
+              print(_bottomNavIndex);
+            }),
+          ),
       ),
     );
   }

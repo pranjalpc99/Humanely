@@ -7,8 +7,8 @@ import 'package:google_maps_webservice/geocoding.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
-import '../google_maps_place_picker.dart';
-import 'components/animated_pin.dart';
+import '../../google_maps_place_picker.dart';
+import '../components/animated_pin.dart';
 import 'package:location/location.dart' as loc;
 import 'package:flutter/services.dart' show rootBundle;
 

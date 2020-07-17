@@ -24,11 +24,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: PlacePicker(
-        apiKey: PLACES_API,
-        useCurrentLocation: true,
-        initialPosition: kInitialPosition,
-      ),
+      home: HomePage(),
+//      home: PlacePicker(
+//        apiKey: PLACES_API,
+//        useCurrentLocation: true,
+//        initialPosition: kInitialPosition,
+//      ),
     );
   }
 }

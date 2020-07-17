@@ -3,7 +3,7 @@ import 'package:Humanely/main.dart';
 
 //import 'package:Humanely/notch_shape.dart';
 import 'package:Humanely/providers/place_provider.dart';
-import 'package:Humanely/src/utils/uuid.dart';
+import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/map_src/utils/uuid.dart';
 import 'package:Humanely/utils/hexcolor.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 
@@ -17,9 +17,9 @@ import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'dart:io' show Platform;
-import '../google_maps_place_picker.dart';
+import '../../google_maps_place_picker.dart';
 import 'autocomplete_search.dart';
-import 'controllers/autocomplete_search_controller.dart';
+import '../controllers/autocomplete_search_controller.dart';
 import 'google_map_place_picker.dart';
 
 enum PinState { Preparing, Idle, Dragging }
@@ -280,24 +280,6 @@ class _PlacePickerState extends State<PlacePicker>
                       title: _buildSearchBar(),
                     ),
                     body: _buildMapWithLocation(),
-                    floatingActionButton: FloatingActionButton(
-                      onPressed: () {},
-                      child: Icon(Icons.add),
-                    ),
-                    floatingActionButtonLocation:
-                        FloatingActionButtonLocation.centerDocked,
-                    bottomNavigationBar : AnimatedBottomNavigationBar(
-                      icons: iconList,
-                  backgroundColor: HexColor('#444444'),
-                  activeIndex: _bottomNavIndex,
-                  leftCornerRadius: 24,
-                  rightCornerRadius: 24,
-                  gapLocation: GapLocation.center,
-                  notchSmoothness: NotchSmoothness.defaultEdge,
-                  notchAndCornersAnimation: animation,
-                  notchMargin: 8.0,
-                  onTap: (index) => setState(() => _bottomNavIndex = index),
-                    ),
                   ),
                 ],
               );

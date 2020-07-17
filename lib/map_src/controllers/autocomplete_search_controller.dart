@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../autocomplete_search.dart';
+import '../fragments/autocomplete_search.dart';
 
 
 class SearchBarController extends ChangeNotifier {

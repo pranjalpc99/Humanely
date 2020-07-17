@@ -1,4 +1,4 @@
-import 'package:Humanely/src/components/rounded_frame.dart';
+import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/map_src/components/rounded_frame.dart';
 import 'package:flutter/material.dart';
 
 

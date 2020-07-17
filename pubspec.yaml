@@ -30,7 +30,7 @@ dependencies:
   tuple: ^1.0.3
   geocoder: ^0.2.1
   animated_bottom_navigation_bar: ^0.1.2+2
-
+  chips_choice: ^1.2.0
 
 
 dev_dependencies:
