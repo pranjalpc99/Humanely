@@ -1,5 +1,7 @@
 
 import 'package:Humanely/fragments/explore.dart';
+import 'package:Humanely/fragments/notification.dart';
+import 'package:Humanely/fragments/profile.dart';
 import 'package:Humanely/google_maps_place_picker.dart';
 import 'package:Humanely/main.dart';
 import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/fragments/demo.dart';
@@ -108,10 +110,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         child = Explore();
         break;
       case 2:
-        child = WrapWidgetDemo();
+        child = NotificationFragment();
         break;
       case 3:
-        child = FlutterLogo();
+        child = Profile();
         break;
     }
 

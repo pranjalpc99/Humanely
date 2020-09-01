@@ -1,4 +1,5 @@
 import 'package:Humanely/models/explore_card.dart';
+import 'package:Humanely/models/explore_detail.dart';
 import 'package:Humanely/models/scroll_behaviour.dart';
 import 'package:Humanely/utils/sizes.dart';
 import 'package:chips_choice/chips_choice.dart';
@@ -105,8 +106,11 @@ class _ExploreState extends State<Explore> {
                     width: MediaQuery.of(context).size.width,
                     padding:
                         EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                    child: ExploreCard(index),
-                  )),
+                    child: InkWell(
+                        onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ExploreDetail()));},
+                        child: ExploreCard(index)),
+                  ),
+          ),
         ),
       ],
     );
