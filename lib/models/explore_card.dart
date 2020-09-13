@@ -17,6 +17,12 @@ class _ExploreCardState extends State<ExploreCard> {
 
   TextEditingController commentController = TextEditingController();
 
+  // ignore: non_constant_identifier_names
+  firestore_fetch_posts()
+  {
+
+  }
+
 
   @override
   Widget build(BuildContext context) {

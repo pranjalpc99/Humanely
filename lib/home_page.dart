@@ -1,11 +1,8 @@
-
 import 'package:Humanely/fragments/explore.dart';
 import 'package:Humanely/fragments/notification.dart';
 import 'package:Humanely/fragments/profile.dart';
 import 'package:Humanely/google_maps_place_picker.dart';
 import 'package:Humanely/main.dart';
-import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/fragments/demo.dart';
-
 import 'package:Humanely/user_register.dart';
 import 'package:Humanely/utils/credentials.dart';
 import 'package:Humanely/utils/hexcolor.dart';

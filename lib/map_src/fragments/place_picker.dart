@@ -3,7 +3,6 @@ import 'package:Humanely/main.dart';
 
 //import 'package:Humanely/notch_shape.dart';
 import 'package:Humanely/providers/place_provider.dart';
-import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/map_src/utils/uuid.dart';
 import 'package:Humanely/utils/hexcolor.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 
@@ -18,6 +17,7 @@ import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'dart:io' show Platform;
 import '../../google_maps_place_picker.dart';
+import '../utils/uuid.dart';
 import 'autocomplete_search.dart';
 import '../controllers/autocomplete_search_controller.dart';
 import 'google_map_place_picker.dart';
