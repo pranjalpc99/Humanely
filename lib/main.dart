@@ -13,9 +13,11 @@ void main() {
 
 class MyApp extends StatelessWidget {
   static final kInitialPosition = LatLng(19.124573, 72.837319);
+  final navigatorKey = GlobalKey<NavigatorState>();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Flutter Demo',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

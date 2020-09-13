@@ -1,4 +1,5 @@
 
+import 'package:Humanely/camerascreen/camera_screen.dart';
 import 'package:Humanely/fragments/explore.dart';
 import 'package:Humanely/fragments/notification.dart';
 import 'package:Humanely/fragments/profile.dart';
@@ -65,13 +66,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     this._firebaseUser = await FirebaseAuth.instance.currentUser();
     setState(() {
       _status =
-      (_firebaseUser == null) ? 'Not Logged In\n' : 'Already LoggedIn\n';
+      (_firebaseUser == null) ? 'Not Logged In Home Page\n' : 'Already LoggedIn Home page\n';
       if(_firebaseUser == null) {
-        print("Not logged in");
+        print("Not logged in Home page if condition");
         Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'Flutter Demo Home Page')));
       }
       else{
-        print("Already logged in");
+        print("Already logged in home page else condition");
         print(PLACES_API);
 //        Navigator.push(context, MaterialPageRoute(builder: (context) =>
 //            PlacePicker(
@@ -124,7 +125,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           extendBody: true,
           body: SizedBox.expand(child: child),
           floatingActionButton: FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScreen()));
+            },
             child: Icon(Icons.add),
           ),
           floatingActionButtonLocation:

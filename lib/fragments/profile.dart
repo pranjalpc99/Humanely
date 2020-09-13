@@ -1,3 +1,5 @@
+import 'package:Humanely/home_page.dart';
+import 'package:Humanely/utils/auth.dart';
 import 'package:Humanely/utils/hexcolor.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +9,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,15 +23,20 @@ class _ProfileState extends State<Profile> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Card(
-                    color: HexColor("#333333"),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50.0),
+                  InkWell(
+                    onTap: () {
+                      _signOut();
+                    },
+                    child: Card(
+                      color: HexColor("#333333"),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Icon(Icons.person,size: 56,),
+                        )
                     ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Icon(Icons.person,size: 56,),
-                      )
                   ),
                   SizedBox(height: 10,),
                   Text("Pranjal Chaudhari",style: TextStyle(color: Colors.white,fontSize: 20),),
@@ -174,5 +182,10 @@ class _ProfileState extends State<Profile> {
         ],
       ),
     );
+  }
+
+  Future<void> _signOut() async{
+    await Auth.auth.signOut();
+    Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
   }
 }

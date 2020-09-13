@@ -190,7 +190,7 @@ class _PlacePickerState extends State<PlacePicker>
   @override
   void initState() {
     super.initState();
-    _getFirebaseUser();
+    //_getFirebaseUser();
 
     provider =
         PlaceProvider(widget.apiKey, widget.proxyBaseUrl, widget.httpClient);
@@ -219,24 +219,6 @@ class _PlacePickerState extends State<PlacePicker>
       Duration(seconds: 1),
       () => _animationController.forward(),
     );
-  }
-
-  Future<void> _getFirebaseUser() async {
-    this._firebaseUser = await FirebaseAuth.instance.currentUser();
-    setState(() {
-      _status =
-          (_firebaseUser == null) ? 'Not Logged In\n' : 'Already LoggedIn\n';
-      if (_firebaseUser == null) {
-        print("Not logged in");
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    MyHomePage(title: 'Flutter Demo Home Page')));
-      } else {
-        print("Already logged in");
-      }
-    });
   }
 
   final iconList = <IconData>[

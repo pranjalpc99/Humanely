@@ -8,8 +8,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRegister extends StatefulWidget {
+  final String number;
+
+  UserRegister(this.number);
+
   @override
   _UserRegisterState createState() => _UserRegisterState();
 }
@@ -24,27 +29,15 @@ class _UserRegisterState extends State<UserRegister> {
 
   @override
   void initState() {
-    _getFirebaseUser();
+    //_getFirebaseUser();
     super.initState();
+    phoneNumber = widget.number;
   }
 
-  Future<void> _getFirebaseUser() async {
-    this._firebaseUser = await FirebaseAuth.instance.currentUser();
-    setState(() {
-      _status =
-      (_firebaseUser == null) ? 'Not Logged In\n' : 'Already LoggedIn\n';
-      if(_firebaseUser == null) {
-        print("Not logged in");
-        Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'Flutter Demo Home Page')));
-      }
-      else{
-        print("Already logged in");
-        phoneNumber = _firebaseUser.phoneNumber;
-        print(phoneNumber);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-      }
-
-    });
+  getPhoneNumber() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String num = preferences.getString("phoneNumber");
+    return num;
   }
 
   @override
@@ -234,6 +227,7 @@ class _UserRegisterState extends State<UserRegister> {
                         });
                         print(firstName);
                         print(lastName);
+                        print(phoneNumber);
                         Auth.store.collection('Users').document(phoneNumber).setData({
                           'firstName' : firstName,
                           'lastName' : lastName,

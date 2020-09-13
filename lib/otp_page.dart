@@ -1,10 +1,12 @@
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/user_register.dart';
+import 'package:Humanely/utils/auth.dart';
 import 'package:Humanely/utils/size_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 
@@ -24,6 +26,7 @@ class _OTPPageState extends State<OTPPage> {
   //TextEditingController controller = TextEditingController();
   TextEditingController _phoneNumberController = TextEditingController();
   TextEditingController _otpController = TextEditingController();
+  BuildContext _context;
 
   FirebaseUser _firebaseUser;
   String _status;
@@ -32,8 +35,9 @@ class _OTPPageState extends State<OTPPage> {
   static String _verificationId;
   int _code;
 
-  Future<void> _submitPhoneNumber(String number) async {
+  Future<void> _submitPhoneNumber(String number,BuildContext context) async {
     print("in _submitPhoneNumber");
+    print("show context "+context.toString());
     /// NOTE: Either append your phone number country code or add in the code itself
     /// Since I'm in India we use "+91 " as prefix `phoneNumber`
     String phoneNumber = "+91 " + number.toString().trim();
@@ -41,23 +45,41 @@ class _OTPPageState extends State<OTPPage> {
     phone = phoneNumber;
 
     /// The below functions are the callbacks, separated so as to make code more redable
-    void verificationCompleted(AuthCredential phoneAuthCredential) {
+    void verificationCompleted(AuthCredential phoneAuthCredential) async{
       print('verificationCompleted');
       this._phoneAuthCredential = phoneAuthCredential;
       print("phoneAuth");
       print(phoneAuthCredential);
-      _login();
+      print("call login");
+      await Auth.auth.signInWithCredential(phoneAuthCredential).then((value) {
+        print("value: "+value.toString());
+        print("in direct function");
+        print("context :"+context.toString());
+        Navigator.push(context, MaterialPageRoute(builder: (context) => UserRegister(number)));
+      });
+      //print("verify id: "+_verificationId);
+      //_login();
       setState(() {
         _status += 'verificationCompleted\n';
       });
+//      Fluttertoast.showToast(
+//          msg: "Verified Automatically",
+//          toastLength: Toast.LENGTH_SHORT,
+//          gravity: ToastGravity.CENTER,
+//          timeInSecForIosWeb: 1,
+//          fontSize: 16.0
+//      );
+
+
 //      this._phoneAuthCredential = phoneAuthCredential;
 //      print("phoneAuth");
 //      print(phoneAuthCredential);
-//      _login();
+      //_login();
     }
 
     void verificationFailed(AuthException error) {
       print('verificationFailed');
+      print(error.message);
       setState(() {
         _status += '$error\n';
       });
@@ -105,7 +127,7 @@ class _OTPPageState extends State<OTPPage> {
     ); // All the callbacks are above
   }
 
-  void _submitOTP(String otp) {
+  void _submitOTP(String otp,BuildContext context) {
     /// get the `smsCode` from the user
     String smsCode = otp.toString().trim();
     print("in otp");
@@ -116,29 +138,40 @@ class _OTPPageState extends State<OTPPage> {
     this._phoneAuthCredential = PhoneAuthProvider.getCredential(
         verificationId: _verificationId, smsCode: smsCode);
 
-    _login();
+    _login(context);
   }
 
   @override
   void initState() {
     super.initState();
-    _getFirebaseUser();
+    //_getFirebaseUser();
   }
 
-  Future<void> _login() async {
+  Future<String> getPhoneNumber() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String num = preferences.getString("phoneNumber");
+    return num;
+  }
+
+  Future<void> _login(BuildContext context) async {
     /// This method is used to login the user
     /// `AuthCredential`(`_phoneAuthCredential`) is needed for the signIn method
     /// After the signIn method from `AuthResult` we can get `FirebaserUser`(`_firebaseUser`)
+    ///
+
+    String num  = await getPhoneNumber();
+    print("in login");
     print(_verificationId);
     try {
       await FirebaseAuth.instance
           .signInWithCredential(this._phoneAuthCredential)
           .then((AuthResult authRes) {
         _firebaseUser = authRes.user;
-        print(_firebaseUser.toString());
+        print("user of firebase"+_firebaseUser.toString());
       });
-      print("signin success");
-      Navigator.push(context, MaterialPageRoute(builder: (context) => UserRegister()));
+      print("signin success"+num);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => UserRegister(num)));
+
 //      setState(() {
 //        _status += 'Signed In\n';
 //        print("signin success");
@@ -151,23 +184,10 @@ class _OTPPageState extends State<OTPPage> {
     }
   }
 
-  Future<void> _getFirebaseUser() async {
-    this._firebaseUser = await FirebaseAuth.instance.currentUser();
-    setState(() {
-      _status =
-      (_firebaseUser == null) ? 'Not Logged In\n' : 'Already LoggedIn\n';
-      if(_firebaseUser == null)
-        print("Not logged in");
-      else{
-        print("Already logged in");
-        Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-      }
-
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    _context = context;
+    print("context in build "+_context.toString());
     SizeConfig().init(context);
     queryData = MediaQuery.of(context);
     double devicePixelRatio = queryData.devicePixelRatio;
@@ -339,23 +359,23 @@ class VerifyOTP extends StatelessWidget{
             .height * 0.05,),
         Padding(
           padding: const EdgeInsets.only(left :8.0, right: 8.0),
-          child: Card(
-            color: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  InkWell(
-                    onTap: (){
-                      print(_controller.text);
-                      //String num =  getPhoneNumber();
-                      _OTPPageState()._submitOTP(_controller.text);
-                    },
-                    child: Ink(
+          child: InkWell(
+            onTap: (){
+              print(_controller.text);
+              //String num =  getPhoneNumber();
+              _OTPPageState()._submitOTP(_controller.text,context);
+            },
+            child: Card(
+              color: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Ink(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
                         color: Colors.blue,
@@ -368,9 +388,9 @@ class VerifyOTP extends StatelessWidget{
                             color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
-                    ),
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -391,7 +411,7 @@ class VerifyOTP extends StatelessWidget{
             InkWell(
               onTap: (){
                 //phone = _controller.text;
-                _OTPPageState()._submitPhoneNumber(phone);
+                _OTPPageState()._submitPhoneNumber(phone,context);
                 },
               child: Text('RESEND OTP',style: TextStyle(
                   fontFamily: 'Poppins',
@@ -500,8 +520,10 @@ class AddPhoneNumber extends StatelessWidget{
                     onTap: (){
                       //__otpPageState.verifyPhone();
                       savePhoneNumber(_controller.text);
-                      _OTPPageState()._submitPhoneNumber(_controller.text);
+                      _OTPPageState()._submitPhoneNumber(_controller.text,context);
                       //print(_controller.text);
+                      //print("status of login : "+_status);
+                      //print("verify flag "+verfifyFlag.toString());
                       Navigator.push(context, MaterialPageRoute(builder: (context) => OTPPage(true,_controller.text)));
                     },
                     child: Ink(
