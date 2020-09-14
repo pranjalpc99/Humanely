@@ -1,8 +1,11 @@
+import 'package:Humanely/models/IncidentPostModel.dart';
+import 'package:Humanely/models/emergency_card_tile.dart';
 import 'package:Humanely/models/explore_card.dart';
 import 'package:Humanely/models/explore_detail.dart';
 import 'package:Humanely/models/scroll_behaviour.dart';
 import 'package:Humanely/utils/sizes.dart';
 import 'package:chips_choice/chips_choice.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class Explore extends StatefulWidget {
@@ -97,20 +100,37 @@ class _ExploreState extends State<Explore> {
           ),
         ),
         choiceChips(),
-        Expanded(
-          flex: 8,
-          child: ListView.builder(
-              itemCount: 3,
-              shrinkWrap: true,
-              itemBuilder: (BuildContext context, int index) => Container(
-                    width: MediaQuery.of(context).size.width,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                    child: InkWell(
-                        onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => ExploreDetail()));},
-                        child: ExploreCard(index)),
-                  ),
-          ),
+        StreamBuilder(
+          stream: Firestore.instance.collection('posts').snapshots(),
+          builder: (_, AsyncSnapshot<QuerySnapshot> snapshot) {
+            var documents = snapshot.data?.documents ?? [];
+            var postlist = documents.map((snapshot) => IncidentPostModel.fromJson(snapshot.data)).toList();
+//            print("DATAAAAAAAAAAA");
+//            print(postlist[0].title);
+            if (snapshot.data == null) {
+              return Center(child: CircularProgressIndicator(),);
+            }
+            else {
+              return Expanded(
+                flex: 7,
+                child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: postlist.length,
+                    itemBuilder: (context, index) {
+                      print("DATAAAAAAAAAAA");
+                      print(snapshot.data);
+                      return EmergencyCard(postlist[index]);
+//                  return ListTile(
+//                    title: Text(
+//                        snapshot.data.documents[index]["numar_telefon"]),
+//                  );
+                    }
+
+                ),
+              );
+            }
+          }
         ),
       ],
     );

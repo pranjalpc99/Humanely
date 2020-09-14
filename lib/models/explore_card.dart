@@ -35,15 +35,17 @@ class _ExploreCardState extends State<ExploreCard> {
           stream: Firestore.instance.collection('posts').snapshots(),
           builder:  (_, AsyncSnapshot<QuerySnapshot> snapshot) {
             var documents = snapshot.data?.documents ?? [];
-            var postlist = documents.map((snapshot) => IncidentPostModel.from(snapshot)).toList();
-            print("DATAAAAAAAAAAA");
-            print(postlist[0].title);
+            var postlist = documents.map((snapshot) => IncidentPostModel.fromJson(snapshot.data)).toList();
+//            print("DATAAAAAAAAAAA");
+//            print(postlist[0].title);
             if (snapshot.data == null) {
               return Center(child: CircularProgressIndicator(),);
             }
             else {
-              return Container(
+              return Expanded(
                 child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
                     itemCount: postlist.length,
                     itemBuilder: (context, index) {
                       print("DATAAAAAAAAAAA");
