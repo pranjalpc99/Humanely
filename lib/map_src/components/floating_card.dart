@@ -1,5 +1,7 @@
-import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/map_src/components/rounded_frame.dart';
+
 import 'package:flutter/material.dart';
+
+import 'rounded_frame.dart';
 
 
 class FloatingCard extends StatelessWidget {
