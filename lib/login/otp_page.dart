@@ -1,5 +1,5 @@
 import 'package:Humanely/home_page.dart';
-import 'package:Humanely/user_register.dart';
+import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/login/user_register.dart';
 import 'package:Humanely/utils/auth.dart';
 import 'package:Humanely/utils/size_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,10 +40,13 @@ class _OTPPageState extends State<OTPPage> {
     print("show context "+context.toString());
     /// NOTE: Either append your phone number country code or add in the code itself
     /// Since I'm in India we use "+91 " as prefix `phoneNumber`
+    number = number.replaceAll("+91", "");
     String phoneNumber = "+91 " + number.toString().trim();
-    print(phoneNumber);
-    phone = phoneNumber;
+    print(number.toString().trim());
+    phone = "";
 
+    phone = phoneNumber;
+    print("phone:" +phone);
     /// The below functions are the callbacks, separated so as to make code more redable
     void verificationCompleted(AuthCredential phoneAuthCredential) async{
       print('verificationCompleted');
@@ -170,8 +173,13 @@ class _OTPPageState extends State<OTPPage> {
         print("user of firebase"+_firebaseUser.toString());
       });
       print("signin success"+num);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => UserRegister(num)));
-
+      Fluttertoast.showToast(msg: "OTP Verification Successful",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white70,
+          textColor: Colors.black,
+          fontSize: 16.0).then((value) => Navigator.push(context, MaterialPageRoute(builder: (context) => UserRegister(num))));
 //      setState(() {
 //        _status += 'Signed In\n';
 //        print("signin success");

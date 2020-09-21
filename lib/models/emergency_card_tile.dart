@@ -48,7 +48,7 @@ class _EmergencyCardState extends State<EmergencyCard> {
                             Padding(
                               padding: const EdgeInsets.only(left: 8.0, top: 8.0),
                               child: Text(
-                                model.title+"",
+                                model.title==null? "" : model.title,
                                 style: TextStyle(
                                     fontFamily: 'Poppins',
                                     color: Colors.white,
