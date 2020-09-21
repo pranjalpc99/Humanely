@@ -1,4 +1,4 @@
-import 'package:Humanely/google_maps_place_picker.dart';
+
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/utils/app_theme.dart';
 import 'package:Humanely/utils/credentials.dart';
@@ -6,7 +6,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'otp_page.dart';
+import 'login/otp_page.dart';
 
 void main() {
   Crashlytics.instance.enableInDevMode = true;
@@ -69,7 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(50.0),
-                  child: Text('Logo'),
+                  child: Image(
+                    image: AssetImage('assets/images/logo2.png'),
+                  ),
                 ),
               ),
             ),

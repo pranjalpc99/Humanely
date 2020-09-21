@@ -6,14 +6,30 @@ class IncidentPostModel {
   String title;
   String place;
   String votes;
+  String id;
 
-  IncidentPostModel({this.title,this.timestamp,this.place,this.votes});
+  DocumentReference reference;
 
-  IncidentPostModel.fromJson(Map<String, dynamic> parsedJson)
-    : title = parsedJson['title'],
-      timestamp = parsedJson['timestamp'],
-      place = parsedJson['place'],
-      votes = parsedJson['votes'];
+  IncidentPostModel({this.title,this.id,this.timestamp,this.place,this.votes});
+
+  factory IncidentPostModel.fromSnapshot(DocumentSnapshot snapshot) {
+    IncidentPostModel newPost = IncidentPostModel.fromJson(snapshot.data);
+    newPost.reference = snapshot.reference;
+    return newPost;
+  }
+
+  factory IncidentPostModel.fromJson(Map<String, dynamic> json) => _PostFromJson(json);
+
+  Map<String, dynamic> toJson() => _PostToJson(this);
+
+  @override
+  String toString() => "Post<$title>";
+
+//  IncidentPostModel.fromJson(Map<String, dynamic> parsedJson)
+//    : title = parsedJson['title'],
+//      timestamp = parsedJson['timestamp'],
+//      place = parsedJson['place'],
+//      votes = parsedJson['votes'];
 
 //  IncidentPostModel.data(this.reference,
 //      [this.timestamp,
@@ -47,3 +63,21 @@ class IncidentPostModel {
 //    };
 //  }
 }
+
+IncidentPostModel _PostFromJson(Map<String,dynamic> json){
+  return IncidentPostModel(
+    title: json['title'] as String,
+    id: json['id'] as String,
+    timestamp: json['timestamp'] as String,
+    place: json['place'] as String,
+    votes: json['votes'] as String
+  );
+}
+
+Map<String, dynamic> _PostToJson(IncidentPostModel instance) => <String, dynamic> {
+  'title': instance.title,
+  'id': instance.id,
+  'timestamp': instance.timestamp,
+  'place': instance.place,
+  'votes': instance.votes,
+};

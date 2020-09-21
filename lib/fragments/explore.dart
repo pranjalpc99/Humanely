@@ -105,10 +105,13 @@ class _ExploreState extends State<Explore> {
           builder: (_, AsyncSnapshot<QuerySnapshot> snapshot) {
             var documents = snapshot.data?.documents ?? [];
             var postlist = documents.map((snapshot) => IncidentPostModel.fromJson(snapshot.data)).toList();
+            postlist.sort((a,b) => a.id.compareTo(b.id));
+            postlist = postlist.reversed.toList();
 //            print("DATAAAAAAAAAAA");
 //            print(postlist[0].title);
             if (snapshot.data == null) {
-              return Center(child: CircularProgressIndicator(),);
+              return Expanded(flex: 7,
+                child: Center(child: CircularProgressIndicator()),);
             }
             else {
               return Expanded(

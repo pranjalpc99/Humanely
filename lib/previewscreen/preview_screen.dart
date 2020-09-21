@@ -30,10 +30,16 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:Humanely/fragments/explore.dart';
+import 'package:Humanely/home_page.dart';
+import 'package:Humanely/models/IncidentPostModel.dart';
 import 'package:Humanely/models/scroll_behaviour.dart';
 import 'package:Humanely/utils/app_theme.dart';
+import 'package:Humanely/utils/data_repository.dart';
+import 'package:Humanely/utils/months.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 
 class PreviewImageScreen extends StatefulWidget {
@@ -47,8 +53,14 @@ class PreviewImageScreen extends StatefulWidget {
 
 class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
+  final DataRepository repository = DataRepository();
+
   List<String> _tags;
   int _defaultTagIndex;
+  String title="";
+  String timestamp;
+  String place;
+  String votes;
 
 
   @override
@@ -97,7 +109,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     );
   }
 
-  Widget _postTopBar() {
+  Widget _postTopBar(BuildContext context) {
     return Container(
       child: Row(
         children: <Widget>[
@@ -119,10 +131,34 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           ),
           Text("New Post"),
           Expanded(
-            child: Text(
-              "POST",
-              textAlign: TextAlign.end,
-              style: TextStyle(color: AppTheme.darkTheme.colorScheme.secondary),
+            child: InkWell(
+              onTap: (){
+                //print("title is: "+title);
+                String dtn = DateTime.now().toString();
+                String d = dtn.substring(0,dtn.indexOf(" "));
+                String t = dtn.substring(dtn.indexOf(" "),dtn.indexOf("."));
+                String y = d.substring(0,4);
+                String m = d.substring(5,7);
+                String dt = d.substring(8);
+                int mIndex = int.parse(m);
+                String timestamp = dt + " " +Months().mon[mIndex] +", "+y +" "+t;
+                print(timestamp);
+                IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: "Andheri",votes: "1");
+                repository.addPost(newPost);
+                Fluttertoast.showToast(msg: "Post Successful",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.white70,
+                    textColor: Colors.black,
+                    fontSize: 16.0);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+              },
+              child: Text(
+                "POST",
+                textAlign: TextAlign.end,
+                style: TextStyle(color: AppTheme.darkTheme.colorScheme.secondary),
+              ),
             ),
           ),
           SizedBox(
@@ -138,7 +174,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: _postTopBar(),
+          title: _postTopBar(context),
           backgroundColor: Colors.transparent,
           automaticallyImplyLeading: false,
         ),
@@ -177,6 +213,10 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                           hintStyle: TextStyle(color: Colors.white)),
+                      onChanged: (value) {
+                        //print(value);
+                        title = value;
+                      },
                     ),
                   ),
                   SizedBox(
