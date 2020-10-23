@@ -1,7 +1,10 @@
+
+
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/utils/auth.dart';
 import 'package:Humanely/utils/hexcolor.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -9,9 +12,28 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  String number="";
+
+  getPhoneNumber() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String num = preferences.getString("phoneNumber");
+    number = num;
+    return num;
+  }
+
+  @override
+  void initState(){
+    // TODO: implement initState
+    super.initState();
+    getPhoneNumber().then((result){
+      print(result+" in init res");
+      number = result.toString();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    print("number in profile "+number);
     return Scaffold(
       body: Container(
         margin: EdgeInsets.only(top:30),

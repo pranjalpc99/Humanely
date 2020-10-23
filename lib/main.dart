@@ -11,6 +11,7 @@ import 'login/otp_page.dart';
 void main() {
   Crashlytics.instance.enableInDevMode = true;
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
+  GestureBinding.instance.resamplingEnabled = true;
   runApp(MyApp());
 }
 
