@@ -93,14 +93,14 @@ class Sizes {
       defaultScreenHeight = screenHeight;
     }
 
-    print('''
-    ========Device Screen Details===============
-    screenWidth: $screenWidth
-    screenHeight: $screenHeight
-    
-    defaultScreenWidth: $defaultScreenWidth
-    defaultScreenHeight: $defaultScreenHeight
-    ''');
+    // print('''
+    // ========Device Screen Details===============
+    // screenWidth: $screenWidth
+    // screenHeight: $screenHeight
+    //
+    // defaultScreenWidth: $defaultScreenWidth
+    // defaultScreenHeight: $defaultScreenHeight
+    // ''');
 
     ScreenUtil.init(
       width: defaultScreenWidth,

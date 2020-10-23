@@ -36,28 +36,28 @@ class _OTPPageState extends State<OTPPage> {
   int _code;
 
   Future<void> _submitPhoneNumber(String number,BuildContext context) async {
-    print("in _submitPhoneNumber");
-    print("show context "+context.toString());
+    //print("in _submitPhoneNumber");
+    //print("show context "+context.toString());
     /// NOTE: Either append your phone number country code or add in the code itself
     /// Since I'm in India we use "+91 " as prefix `phoneNumber`
     number = number.replaceAll("+91", "");
     String phoneNumber = "+91 " + number.toString().trim();
-    print(number.toString().trim());
+    //print(number.toString().trim());
     phone = "";
 
     phone = phoneNumber;
-    print("phone:" +phone);
+    //print("phone:" +phone);
     /// The below functions are the callbacks, separated so as to make code more redable
     void verificationCompleted(AuthCredential phoneAuthCredential) async{
-      print('verificationCompleted');
+      //print('verificationCompleted');
       this._phoneAuthCredential = phoneAuthCredential;
-      print("phoneAuth");
-      print(phoneAuthCredential);
-      print("call login");
+      //print("phoneAuth");
+      //print(phoneAuthCredential);
+      //print("call login");
       await Auth.auth.signInWithCredential(phoneAuthCredential).then((value) {
-        print("value: "+value.toString());
-        print("in direct function");
-        print("context :"+context.toString());
+        //print("value: "+value.toString());
+       // print("in direct function");
+       // print("context :"+context.toString());
         Navigator.push(context, MaterialPageRoute(builder: (context) => UserRegister(number)));
       });
       //print("verify id: "+_verificationId);
@@ -90,11 +90,11 @@ class _OTPPageState extends State<OTPPage> {
     }
 
     void codeSent(String verificationId, [int code]) {
-      print('codeSent');
+      //print('codeSent');
       _verificationId = verificationId;
-      print(verificationId);
+      //print(verificationId);
       this._code = code;
-      print(code.toString());
+      //print(code.toString());
       setState(() {
         _status += 'Code Sent\n';
       });
@@ -105,7 +105,7 @@ class _OTPPageState extends State<OTPPage> {
       setState(() {
         _status += 'codeAutoRetrievalTimeout\n';
       });
-      print(verificationId);
+      //print(verificationId);
     }
 
     await FirebaseAuth.instance.verifyPhoneNumber(
@@ -133,8 +133,8 @@ class _OTPPageState extends State<OTPPage> {
   void _submitOTP(String otp,BuildContext context) {
     /// get the `smsCode` from the user
     String smsCode = otp.toString().trim();
-    print("in otp");
-    print(otp);
+   // print("in otp");
+   // print(otp);
 
     /// when used different phoneNumber other than the current (running) device
     /// we need to use OTP to get `phoneAuthCredential` which is inturn used to signIn/login
@@ -163,16 +163,16 @@ class _OTPPageState extends State<OTPPage> {
     ///
 
     String num  = await getPhoneNumber();
-    print("in login");
-    print(_verificationId);
+    //print("in login");
+    //print(_verificationId);
     try {
       await FirebaseAuth.instance
           .signInWithCredential(this._phoneAuthCredential)
           .then((AuthResult authRes) {
         _firebaseUser = authRes.user;
-        print("user of firebase"+_firebaseUser.toString());
+       // print("user of firebase"+_firebaseUser.toString());
       });
-      print("signin success"+num);
+      //print("signin success"+num);
       Fluttertoast.showToast(msg: "OTP Verification Successful",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
@@ -195,7 +195,7 @@ class _OTPPageState extends State<OTPPage> {
   @override
   Widget build(BuildContext context) {
     _context = context;
-    print("context in build "+_context.toString());
+    //print("context in build "+_context.toString());
     SizeConfig().init(context);
     queryData = MediaQuery.of(context);
     double devicePixelRatio = queryData.devicePixelRatio;
@@ -369,7 +369,7 @@ class VerifyOTP extends StatelessWidget{
           padding: const EdgeInsets.only(left :8.0, right: 8.0),
           child: InkWell(
             onTap: (){
-              print(_controller.text);
+              //print(_controller.text);
               //String num =  getPhoneNumber();
               _OTPPageState()._submitOTP(_controller.text,context);
             },

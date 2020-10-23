@@ -230,9 +230,9 @@ class _UserRegisterState extends State<UserRegister> {
                         setState(() {
                           showSpinner = true;
                         });
-                        print(firstName);
-                        print(lastName);
-                        print(phoneNumber);
+                        //print(firstName);
+                       // print(lastName);
+                        //print(phoneNumber);
                         Auth.store.collection('Users').document(phoneNumber).setData({
                           'firstName' : firstName,
                           'lastName' : lastName,

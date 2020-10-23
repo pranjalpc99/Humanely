@@ -3,21 +3,76 @@ import 'package:Humanely/home_page.dart';
 import 'package:Humanely/utils/app_theme.dart';
 import 'package:Humanely/utils/credentials.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 
 import 'login/otp_page.dart';
 
 void main() {
   Crashlytics.instance.enableInDevMode = true;
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
-  GestureBinding.instance.resamplingEnabled = true;
+  //print("binding: "+GestureBinding.instance.toString());
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   static final kInitialPosition = LatLng(19.124573, 72.837319);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
+
+  List<DisplayMode> modes = <DisplayMode>[];
+
+  DisplayMode selected;
+
+  Future<void> fetchModes() async {
+    try {
+      modes = await FlutterDisplayMode.supported;
+      modes.forEach(print);
+
+      /// On OnePlus 7 Pro:
+      /// #1 1080x2340 @ 60Hz
+      /// #2 1080x2340 @ 90Hz
+      /// #3 1440x3120 @ 90Hz
+      /// #4 1440x3120 @ 60Hz
+
+      /// On OnePlus 8 Pro:
+      /// #1 1080x2376 @ 60Hz
+      /// #2 1440x3168 @ 120Hz
+      /// #3 1440x3168 @ 60Hz
+      /// #4 1080x2376 @ 120Hz
+    } on PlatformException catch (e) {
+      print(e);
+
+      /// e.code =>
+      /// noAPI - No API support. Only Marshmallow and above.
+      /// noActivity - Activity is not available. Probably app is in background
+    }
+    selected =
+        modes.firstWhere((DisplayMode m) => m.selected, orElse: () => null);
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<DisplayMode> getCurrentMode() async {
+    return await FlutterDisplayMode.current;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchModes();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

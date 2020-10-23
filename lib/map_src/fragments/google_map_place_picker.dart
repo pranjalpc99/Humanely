@@ -197,7 +197,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
             myLocationEnabled: true,
             zoomControlsEnabled: false,
             onMapCreated: (GoogleMapController controller) async {
-              print("map created");
+             // print("map created");
               String style = await getJsonFile('assets/map/map_style.json');
               provider.mapController = controller;
               provider.setCameraPosition(null);
@@ -214,7 +214,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
             },
             onCameraIdle: () {
-              print("map idle");
+             // print("map idle");
               if (provider.isAutoCompleteSearching) {
                 provider.isAutoCompleteSearching = false;
                 provider.pinState = PinState.Idle;
@@ -239,7 +239,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
               provider.pinState = PinState.Idle;
             },
             onCameraMoveStarted: () {
-              print("map move started");
+             // print("map move started");
               provider.setPrevCameraPosition(provider.cameraPosition);
 
               // Cancel any other timer.
@@ -251,7 +251,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
               onMoveStart();
             },
             onCameraMove: (CameraPosition position) {
-              print("map moving");
+             // print("map moving");
               provider.setCameraPosition(position);
             },
           );
@@ -368,7 +368,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
   }
 
   Widget _buildLoadingIndicator() {
-    print("in indicator");
+    //print("in indicator");
     return Container(
       height: 48,
       child: const Center(
@@ -386,7 +386,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
 //  }
 
   Widget _buildSelectionDetails(BuildContext context, PickResult result) {
-    print("in details");
+    //print("in details");
     return Container(
       margin: EdgeInsets.all(10),
       child: Column(
@@ -407,7 +407,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.0),
             ),
             onPressed: () {
-              print("place picked "+_currentAddress);
+             // print("place picked "+_currentAddress);
               onPlacePicked(result);
               getAddress(_currentAddress);
             },
