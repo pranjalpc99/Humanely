@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserModel {
+class User {
   String id;
   String fName;
   String lName;
 
   DocumentReference reference;
 
-  UserModel({this.id,this.fName,this.lName});
+  User({this.id,this.fName,this.lName});
 
   /*factory UserModel.fromSnapshot(DocumentSnapshot snapshot) {
     UserModel newUser = UserModel.fromJson(snapshot.data);
@@ -22,14 +22,14 @@ class UserModel {
   @override
   String toString() => "User<$id>";
 
-  Map<String,dynamic> _UserToJson(UserModel instance) => <String, dynamic> {
+  Map<String,dynamic> _UserToJson(User instance) => <String, dynamic> {
     'id' : instance.id,
     'fName' : instance.fName,
     'lName' : instance.lName,
   };
 
-  UserModel _UserFromJson(Map<String,dynamic> json){
-    return UserModel(
+  User _UserFromJson(Map<String,dynamic> json){
+    return User(
         id: json['id'] as String,
         fName : json['fName'] as String,
         lName : json['lName'] as String

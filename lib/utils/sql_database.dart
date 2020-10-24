@@ -39,18 +39,18 @@ class DBProvider {
     });
   }
 
-  Future<User> save(User user) async {
+  /*Future<User> save(User user) async {
     var dbUser = await database;
     user.id = await dbUser.insert(TABLE, user.toMap());
     return user;
 
-    /*await dbUser.transaction((txn) async {
+    *//*await dbUser.transaction((txn) async {
       var query = "INSERT INTO $TABLE ($F_NAME) VALUES ('"+ user.fName +"')";
       return await txn.rawInsert(query);
-    });*/
-  }
+    });*//*
+  }*/
 
-  Future<List<User>> getUser() async {
+  /*Future<List<User>> getUser() async {
     var dbUser = await database;
     List<Map> map = await dbUser.query(TABLE,columns:[ID,F_NAME,L_NAME]);
     List<User> user = [];
@@ -60,7 +60,7 @@ class DBProvider {
       }
     }
     return user;
-  }
+  }*/
 
   Future close() async {
     var dbUser = await database;

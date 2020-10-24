@@ -42,6 +42,7 @@ dependencies:
   fluttertoast: ^7.0.4
   sqflite: any
   flutter_displaymode: ^0.1.0
+  contacts_service: ^0.4.6
 
 
 dev_dependencies:
