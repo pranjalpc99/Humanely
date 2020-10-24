@@ -10,6 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dart:async';
+
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+
 class UserRegister extends StatefulWidget {
   final String number;
 
@@ -225,9 +230,9 @@ class _UserRegisterState extends State<UserRegister> {
                         setState(() {
                           showSpinner = true;
                         });
-                        print(firstName);
-                        print(lastName);
-                        print(phoneNumber);
+                        //print(firstName);
+                       // print(lastName);
+                        //print(phoneNumber);
                         Auth.store.collection('Users').document(phoneNumber).setData({
                           'firstName' : firstName,
                           'lastName' : lastName,

@@ -48,8 +48,8 @@ class _ExploreCardState extends State<ExploreCard> {
                     shrinkWrap: true,
                     itemCount: postlist.length,
                     itemBuilder: (context, index) {
-                      print("DATAAAAAAAAAAA");
-                      print(snapshot.data);
+                     // print("DATAAAAAAAAAAA");
+                     // print(snapshot.data);
                       return EmergencyCard(postlist[index]);
 //                  return ListTile(
 //                    title: Text(

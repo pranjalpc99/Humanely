@@ -142,7 +142,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 String dt = d.substring(8);
                 int mIndex = int.parse(m);
                 String timestamp = dt + " " +Months().mon[mIndex] +", "+y +" "+t;
-                print(timestamp);
+                //print(timestamp);
                 IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: "Andheri",votes: "1");
                 repository.addPost(newPost);
                 Fluttertoast.showToast(msg: "Post Successful",

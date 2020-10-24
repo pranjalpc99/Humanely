@@ -6,7 +6,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.8.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -40,6 +40,9 @@ dependencies:
   path: ^1.6.2
   esys_flutter_share: ^1.0.2
   fluttertoast: ^7.0.4
+  sqflite: any
+  flutter_displaymode: ^0.1.0
+  contacts_service: ^0.4.6
 
 
 dev_dependencies:

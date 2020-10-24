@@ -65,12 +65,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       _status =
       (_firebaseUser == null) ? 'Not Logged In Home Page\n' : 'Already LoggedIn Home page\n';
       if(_firebaseUser == null) {
-        print("Not logged in Home page if condition");
+        //print("Not logged in Home page if condition");
         Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'Flutter Demo Home Page')));
       }
       else{
-        print("Already logged in home page else condition");
-        print(PLACES_API);
+        //print("Already logged in home page else condition");
+        //print(PLACES_API);
 //        Navigator.push(context, MaterialPageRoute(builder: (context) =>
 //            PlacePicker(
 //              apiKey: PLACES_API,
@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             notchMargin: 8.0,
             onTap: (index) => setState(() {
               _bottomNavIndex = index;
-              print(_bottomNavIndex);
+              //print(_bottomNavIndex);
             }),
           ),
       ),
