@@ -109,7 +109,7 @@ class _FriendState extends State<Friend> {
               child: CircularProgressIndicator(),
             );
           }
-          //print(frienList);
+          print(frienList);
 
           frienList.sort((a, b) => a.fname.compareTo(b.fname));
           return ListView.builder(

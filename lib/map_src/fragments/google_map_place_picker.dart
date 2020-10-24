@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:Humanely/providers/place_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,26 +13,30 @@ import '../../google_maps_place_picker.dart';
 import '../components/animated_pin.dart';
 import 'package:location/location.dart' as loc;
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:Humanely/models/MarkerModel.dart';
 
 String _currentAddress = "";
 loc.LocationData locationData;
 loc.Location location;
 loc.LocationData currentLocation;
 String _mapStyle;
+Set<Marker> markers = {};
+BitmapDescriptor pinLocationIcon;
+bool vis = true;
 
 typedef SelectedPlaceWidgetBuilder = Widget Function(
-    BuildContext context,
-    PickResult selectedPlace,
-    SearchingState state,
-    bool isSearchBarFocused,
-    );
+  BuildContext context,
+  PickResult selectedPlace,
+  SearchingState state,
+  bool isSearchBarFocused,
+);
 
 typedef PinBuilder = Widget Function(
-    BuildContext context,
-    PinState state,
-    );
+  BuildContext context,
+  PinState state,
+);
 
-class GoogleMapPlacePicker extends StatelessWidget {
+class GoogleMapPlacePicker extends StatefulWidget {
   const GoogleMapPlacePicker({
     Key key,
     @required this.initialTarget,
@@ -81,57 +87,62 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   final bool forceSearchOnZoomChanged;
 
+  @override
+  _GoogleMapPlacePickerState createState() => _GoogleMapPlacePickerState();
+}
+
+class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
   _searchByCameraLocation(PlaceProvider provider) async {
     // We don't want to search location again if camera location is changed by zooming in/out.
     bool hasZoomChanged = provider.cameraPosition != null &&
         provider.prevCameraPosition != null &&
         provider.cameraPosition.zoom != provider.prevCameraPosition.zoom;
-    if (forceSearchOnZoomChanged == false && hasZoomChanged) return;
+    if (widget.forceSearchOnZoomChanged == false && hasZoomChanged) return;
 
     provider.placeSearchingState = SearchingState.Searching;
 
     //double long = provider.cameraPosition.target.longitude;
     //double lat = provider.cameraPosition.target.latitude;
 
-    final coordinates = new Coordinates(
-        provider.cameraPosition.target.latitude, provider.cameraPosition.target.longitude);
+    final coordinates = new Coordinates(provider.cameraPosition.target.latitude,
+        provider.cameraPosition.target.longitude);
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        coordinates);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
 
     var first = addresses.first;
     _currentAddress = '${first.addressLine}';
 
     final GeocodingResponse response =
-    await provider.geocoding.searchByLocation(
+        await provider.geocoding.searchByLocation(
       Location(provider.cameraPosition.target.latitude,
           provider.cameraPosition.target.longitude),
-      language: language,
+      language: widget.language,
     );
 
     if (response.errorMessage?.isNotEmpty == true ||
         response.status == "REQUEST_DENIED") {
       print("Camera Location Search Error: " + response.errorMessage);
-      if (onSearchFailed != null) {
-        onSearchFailed(response.status);
+      if (widget.onSearchFailed != null) {
+        widget.onSearchFailed(response.status);
       }
       provider.placeSearchingState = SearchingState.Idle;
       return;
     }
 
-    if (usePlaceDetailSearch) {
+    if (widget.usePlaceDetailSearch) {
       final PlacesDetailsResponse detailResponse =
-      await provider.places.getDetailsByPlaceId(
+          await provider.places.getDetailsByPlaceId(
         response.results[0].placeId,
-        language: language,
+        language: widget.language,
       );
 
       if (detailResponse.errorMessage?.isNotEmpty == true ||
           detailResponse.status == "REQUEST_DENIED") {
         print("Fetching details by placeId Error: " +
             detailResponse.errorMessage);
-        if (onSearchFailed != null) {
-          onSearchFailed(detailResponse.status);
+        if (widget.onSearchFailed != null) {
+          widget.onSearchFailed(detailResponse.status);
         }
         provider.placeSearchingState = SearchingState.Idle;
         return;
@@ -147,20 +158,30 @@ class GoogleMapPlacePicker extends StatelessWidget {
     provider.placeSearchingState = SearchingState.Idle;
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setCustomMapPin();
+  }
+
+  void setCustomMapPin() async {
+    pinLocationIcon = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(20, 20)), 'assets/images/pin2.png');
+  }
 
   void setInitialLocation() async {
     location = new loc.Location();
-    location.onLocationChanged.listen((loc.LocationData cLoc) {
+    location.onLocationChanged.listen((loc.LocationData cLoc) async {
       currentLocation = cLoc;
+      final coordinates =
+          new Coordinates(currentLocation.latitude, currentLocation.longitude);
+      var addresses =
+          await Geocoder.local.findAddressesFromCoordinates(coordinates);
+      var first = addresses.first;
+      _currentAddress = '${first.addressLine}';
+      //_buildFloatingCard();
     });
-
-    final coordinates = new Coordinates(
-        currentLocation.latitude, currentLocation.longitude);
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        coordinates);
-    var first = addresses.first;
-    _currentAddress = '${first.addressLine}';
-    _buildFloatingCard();
   }
 
   Future<String> getJsonFile(String path) async {
@@ -169,92 +190,112 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Stack(
       children: <Widget>[
         _buildGoogleMap(context),
         _buildPin(),
-        //_buildFloatingCard(),
+        _buildFloatingCard(),
         _buildMapIcons(context),
       ],
     );
   }
 
+  //19.1159478,72.8309767
+
   Widget _buildGoogleMap(BuildContext context) {
+    //getMarkers();
     return Selector<PlaceProvider, MapType>(
         selector: (_, provider) => provider.mapType,
         builder: (_, data, __) {
           PlaceProvider provider = PlaceProvider.of(context, listen: false);
           CameraPosition initialCameraPosition =
-          CameraPosition(target: initialTarget, zoom: 15);
+              CameraPosition(target: widget.initialTarget, zoom: 15);
 
-          return GoogleMap(
-            myLocationButtonEnabled: false,
-            compassEnabled: false,
-            mapToolbarEnabled: false,
-            initialCameraPosition: initialCameraPosition,
-            mapType: data,
-            myLocationEnabled: true,
-            zoomControlsEnabled: false,
-            onMapCreated: (GoogleMapController controller) async {
-             // print("map created");
-              String style = await getJsonFile('assets/map/map_style.json');
-              provider.mapController = controller;
-              provider.setCameraPosition(null);
-              provider.pinState = PinState.Idle;
-              provider.mapController.setMapStyle(style);
-
-              // When select initialPosition set to true.
-              if (selectInitialPosition) {
-                provider.setCameraPosition(initialCameraPosition);
-                _searchByCameraLocation(provider);
-              }
-
-              setInitialLocation();
-
-            },
-            onCameraIdle: () {
-             // print("map idle");
-              if (provider.isAutoCompleteSearching) {
-                provider.isAutoCompleteSearching = false;
-                provider.pinState = PinState.Idle;
-                return;
-              }
-
-              // Perform search only if the setting is to true.
-              if (usePinPointingSearch) {
-                // Search current camera location only if camera has moved (dragged) before.
-                if (provider.pinState == PinState.Dragging) {
-                  // Cancel previous timer.
-                  if (provider.debounceTimer?.isActive ?? false) {
-                    provider.debounceTimer.cancel();
-                  }
-                  provider.debounceTimer =
-                      Timer(Duration(milliseconds: debounceMilliseconds), () {
-                        _searchByCameraLocation(provider);
-                      });
+          return StreamBuilder(
+              stream: Firestore.instance.collection('markers').snapshots(),
+              builder: (_, AsyncSnapshot<QuerySnapshot> snapshot) {
+                var documents = snapshot.data?.documents ?? [];
+                var markerList = documents
+                    .map((snapshot) => MarkerModel.fromJson(snapshot.data))
+                    .toList();
+                for (int i = 0; i < markerList.length; i++) {
+                  var pos = LatLng(double.parse(markerList[i].lat),
+                      double.parse(markerList[i].lng));
+                  markers.add(Marker(
+                      markerId: MarkerId(i.toString()),
+                      position: pos,
+                      icon: pinLocationIcon));
                 }
-              }
+                return GoogleMap(
+                  myLocationButtonEnabled: false,
+                  compassEnabled: false,
+                  mapToolbarEnabled: false,
+                  initialCameraPosition: initialCameraPosition,
+                  mapType: data,
+                  myLocationEnabled: true,
+                  zoomControlsEnabled: false,
+                  markers: markers,
+                  onMapCreated: (GoogleMapController controller) async {
+                    // print("map created");
+                    String style =
+                        await getJsonFile('assets/map/map_style.json');
+                    provider.mapController = controller;
+                    provider.setCameraPosition(null);
+                    provider.pinState = PinState.Idle;
+                    provider.mapController.setMapStyle(style);
 
-              provider.pinState = PinState.Idle;
-            },
-            onCameraMoveStarted: () {
-             // print("map move started");
-              provider.setPrevCameraPosition(provider.cameraPosition);
+                    // When select initialPosition set to true.
+                    if (widget.selectInitialPosition) {
+                      provider.setCameraPosition(initialCameraPosition);
+                      _searchByCameraLocation(provider);
+                    }
 
-              // Cancel any other timer.
-              provider.debounceTimer?.cancel();
+                    setInitialLocation();
+                  },
+                  onCameraIdle: () {
+                    // print("map idle");
+                    if (provider.isAutoCompleteSearching) {
+                      provider.isAutoCompleteSearching = false;
+                      provider.pinState = PinState.Idle;
+                      return;
+                    }
 
-              // Update state, dismiss keyboard and clear text.
-              provider.pinState = PinState.Dragging;
+                    // Perform search only if the setting is to true.
+                    if (widget.usePinPointingSearch) {
+                      // Search current camera location only if camera has moved (dragged) before.
+                      if (provider.pinState == PinState.Dragging) {
+                        // Cancel previous timer.
+                        if (provider.debounceTimer?.isActive ?? false) {
+                          provider.debounceTimer.cancel();
+                        }
+                        provider.debounceTimer = Timer(
+                            Duration(milliseconds: widget.debounceMilliseconds),
+                            () {
+                          _searchByCameraLocation(provider);
+                        });
+                      }
+                    }
 
-              onMoveStart();
-            },
-            onCameraMove: (CameraPosition position) {
-             // print("map moving");
-              provider.setCameraPosition(position);
-            },
-          );
+                    provider.pinState = PinState.Idle;
+                  },
+                  onCameraMoveStarted: () {
+                    // print("map move started");
+                    provider.setPrevCameraPosition(provider.cameraPosition);
+
+                    // Cancel any other timer.
+                    provider.debounceTimer?.cancel();
+
+                    // Update state, dismiss keyboard and clear text.
+                    provider.pinState = PinState.Dragging;
+
+                    widget.onMoveStart();
+                  },
+                  onCameraMove: (CameraPosition position) {
+                    // print("map moving");
+                    provider.setCameraPosition(position);
+                  },
+                );
+              });
         });
   }
 
@@ -263,11 +304,12 @@ class GoogleMapPlacePicker extends StatelessWidget {
       child: Selector<PlaceProvider, PinState>(
         selector: (_, provider) => provider.pinState,
         builder: (context, state, __) {
-          if (pinBuilder == null) {
+          if (widget.pinBuilder == null) {
             return _defaultPinBuilder(context, state);
           } else {
             return Builder(
-                builder: (builderContext) => pinBuilder(builderContext, state));
+                builder: (builderContext) =>
+                    widget.pinBuilder(builderContext, state));
           }
         },
       ),
@@ -354,7 +396,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
   Widget _defaultPlaceWidgetBuilder(
       BuildContext context, PickResult data, SearchingState state) {
     return FloatingCard(
-      bottomPosition: MediaQuery.of(context).size.height * 0.05,
+      bottomPosition: MediaQuery.of(context).size.height * 0.125,
       leftPosition: MediaQuery.of(context).size.width * 0.025,
       rightPosition: MediaQuery.of(context).size.width * 0.025,
       width: MediaQuery.of(context).size.width * 0.9,
@@ -381,10 +423,6 @@ class GoogleMapPlacePicker extends StatelessWidget {
     );
   }
 
-//  String getAddress(_currentAddress){
-//    return _currentAddress;
-//  }
-
   Widget _buildSelectionDetails(BuildContext context, PickResult result) {
     //print("in details");
     return Container(
@@ -393,25 +431,25 @@ class GoogleMapPlacePicker extends StatelessWidget {
         children: <Widget>[
           Text(
             _currentAddress,
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(fontSize: 16, color: Colors.white),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 10),
-          RaisedButton(
+          /*RaisedButton(
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: Text(
               "Select here",
-              style: TextStyle(fontSize: 16,color: Colors.white),
+              style: TextStyle(fontSize: 16, color: Colors.white),
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
             onPressed: () {
-             // print("place picked "+_currentAddress);
-              onPlacePicked(result);
-              getAddress(_currentAddress);
+              // print("place picked "+_currentAddress);
+              widget.onPlacePicked(result);
+              widget.getAddress(_currentAddress);
             },
-          ),
+          ),*/
         ],
       ),
     );
@@ -419,10 +457,10 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   Widget _buildMapIcons(BuildContext context) {
     final RenderBox appBarRenderBox =
-    appBarKey.currentContext.findRenderObject();
+        widget.appBarKey.currentContext.findRenderObject();
 
     return Positioned(
-      top: appBarRenderBox.size.height+10.0,
+      top: appBarRenderBox.size.height + 10.0,
       right: 15,
       child: Column(
         children: <Widget>[
@@ -442,20 +480,23 @@ class GoogleMapPlacePicker extends StatelessWidget {
 //          )
 //              : Container(),
           SizedBox(height: 10),
-          enableMyLocationButton
+          widget.enableMyLocationButton
               ? Container(
-            width: 35,
-            height: 35,
-            child: RawMaterialButton(
-              shape: CircleBorder(),
-              fillColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black54
-                  : Colors.white60,
-              elevation: 8.0,
-              onPressed: onMyLocation,
-              child: Icon(Icons.my_location),
-            ),
-          )
+                  width: 35,
+                  height: 35,
+                  child: RawMaterialButton(
+                    shape: CircleBorder(),
+                    fillColor: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black54
+                        : Colors.blue,
+                    elevation: 8.0,
+                    onPressed: widget.onMyLocation,
+                    child: Icon(
+                      Icons.my_location,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
               : Container(),
         ],
       ),

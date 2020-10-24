@@ -236,6 +236,7 @@ class _UserRegisterState extends State<UserRegister> {
                         Auth.store.collection('Users').document(phoneNumber).setData({
                           'firstName' : firstName,
                           'lastName' : lastName,
+                          'number' : phoneNumber
                         }).whenComplete(() {
                           setState(() {
                             showSpinner = false;
