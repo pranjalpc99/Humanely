@@ -58,6 +58,10 @@
             android:value="AIzaSyD57EAZGbSWvKpB1Zik8ZA-Gb4FyGkIb0Q"/>
 
         <meta-data
+            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+            android:value="label" />
+
+        <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
 

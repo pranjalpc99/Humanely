@@ -30,6 +30,7 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:Humanely/firebase_ml_kit/FirebaseMl.dart';
 import 'package:Humanely/fragments/explore.dart';
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/models/IncidentPostModel.dart';
@@ -37,8 +38,12 @@ import 'package:Humanely/models/scroll_behaviour.dart';
 import 'package:Humanely/utils/app_theme.dart';
 import 'package:Humanely/utils/data_repository.dart';
 import 'package:Humanely/utils/months.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 
@@ -46,6 +51,7 @@ class PreviewImageScreen extends StatefulWidget {
   final String imagePath;
 
   PreviewImageScreen({this.imagePath});
+
 
   @override
   _PreviewImageScreenState createState() => _PreviewImageScreenState();
@@ -55,13 +61,14 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   final DataRepository repository = DataRepository();
 
+
   List<String> _tags;
   int _defaultTagIndex;
   String title="";
   String timestamp;
   String place;
   String votes;
-
+ String description;
 
   @override
   void initState() {
@@ -71,6 +78,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
       'Accident',
       'Flood'
     ];
+    print("IMAGE PATH" + widget.imagePath);
+
   }
 
   Widget choiceChips() {
@@ -145,6 +154,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 //print(timestamp);
                 IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: "Andheri",votes: "1");
                 repository.addPost(newPost);
+
+                 uploadPic();
                 Fluttertoast.showToast(msg: "Post Successful",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
@@ -227,11 +238,28 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               SizedBox(height: 20.0),
               Padding(
                 padding: const EdgeInsets.only(left:20.0),
-                child: Text(
-                  "Add Description",
-                  style: TextStyle(color: Colors.white,
-                  fontSize: 18),
+//                child: Text(
+//                  "Add Description",
+//                  style: TextStyle(color: Colors.white,
+//                  fontSize: 18),
+//                ),
+              child:  TextField(
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
                 ),
+                decoration: InputDecoration(
+                    hintText: "Add Description",
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue),
+                    ),
+                    hintStyle: TextStyle(color: Colors.white)),
+                onChanged: (value) {
+                  //print(value);
+                  description  = value;
+                },
+              ),
+
               ),
               SizedBox(
                 height: 10,
@@ -268,7 +296,43 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   }
 
   Future<ByteData> getBytesFromFile() async {
+    print("IMAGE PATH" + widget.imagePath);
     Uint8List bytes = File(widget.imagePath).readAsBytesSync() as Uint8List;
     return ByteData.view(bytes.buffer);
+  }
+
+
+  Future uploadPic( ) async{
+    MLKit mlkitlabel= new MLKit();
+    mlkitlabel.classifyImage(widget.imagePath);
+
+   // String fileName = basename(_image.path);
+    Uint8List bytes = File(widget.imagePath).readAsBytesSync() as Uint8List;
+    StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child("trial");
+    StorageUploadTask uploadTask = firebaseStorageRef.putData(bytes);
+    StorageTaskSnapshot taskSnapshot=await uploadTask.onComplete;
+
+    if (taskSnapshot.error == null) {
+      final String downloadUrl =
+      await taskSnapshot.ref.getDownloadURL();
+//      await Firestore.instance
+//          .collection("images")
+//          .add({"url": downloadUrl, "name": imageName});
+//      setState(() {
+//        isLoading = false;
+//      });
+//      final snackBar =
+//      SnackBar(content: Text('Yay! Success'));
+//      Scaffold.of(context).showSnackBar(snackBar);
+    }
+    else {
+    print(
+    'Error from image repo ${taskSnapshot.error.toString()}');
+    throw ('This file is not an image');
+    }
+    setState(() {
+      print("Profile Picture uploaded");
+    });
+
   }
 }
