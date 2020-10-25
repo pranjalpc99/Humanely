@@ -30,6 +30,7 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:Humanely/MLKIT.dart';
 import 'package:Humanely/fragments/explore.dart';
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/models/IncidentPostModel.dart';
@@ -145,6 +146,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 //print(timestamp);
                 IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: "Andheri",votes: "1");
                 repository.addPost(newPost);
+                MLKit classifier = new MLKit();
+                classifier.classifyImage(widget.imagePath);
                 Fluttertoast.showToast(msg: "Post Successful",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,

@@ -1,5 +1,5 @@
 import 'package:Humanely/home_page.dart';
-import 'file:///C:/Users/G3-3579/AndroidStudioProjects/humanely/lib/login/user_register.dart';
+import 'package:Humanely/login/user_register.dart';
 import 'package:Humanely/utils/auth.dart';
 import 'package:Humanely/utils/size_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
