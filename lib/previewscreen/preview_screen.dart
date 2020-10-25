@@ -30,6 +30,7 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:Humanely/MLKIT.dart';
 import 'package:Humanely/fragments/explore.dart';
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/models/IncidentPostModel.dart';
@@ -39,7 +40,7 @@ import 'package:Humanely/utils/data_repository.dart';
 import 'package:Humanely/utils/months.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -49,9 +50,8 @@ import 'package:path/path.dart';
 
 class PreviewImageScreen extends StatefulWidget {
   final String imagePath;
-
-  PreviewImageScreen({this.imagePath});
-
+  List labeltags;
+  PreviewImageScreen({this.labeltags, this.imagePath});
 
   @override
   _PreviewImageScreenState createState() => _PreviewImageScreenState();
@@ -60,7 +60,6 @@ class PreviewImageScreen extends StatefulWidget {
 class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   final DataRepository repository = DataRepository();
-
 
   List<String> _tags;
   int _defaultTagIndex;
@@ -125,12 +124,12 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           shrinkWrap: true,
           padding: EdgeInsets.only(left: 8.0),
           scrollDirection: Axis.horizontal,
-          itemCount: _tags.length,
+          itemCount: widget.labeltags.length,
           itemBuilder: (BuildContext context, int index) {
             return Row(
               children: <Widget>[
                 ChoiceChip(
-                  label: Text(_tags[index]),
+                  label: Text(widget.labeltags[index]),
                   selected: _defaultTagIndex == index,
                   selectedColor: Colors.blue,
                   onSelected: (bool selected) {
@@ -194,6 +193,9 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 print("URL is $url");
                 IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: _currentAddress,votes: "1",image: url);
                 repository.addPost(newPost);
+                // MLKit classifier = new MLKit();
+                // _tags=  classifier.detectLabels(widget.imagePath) as List<String>;
+
 
                  //uploadPic();
                 Fluttertoast.showToast(msg: "Post Successful",
