@@ -35,6 +35,7 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../MLKIT.dart';
 import '../previewscreen/preview_screen.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -334,10 +335,13 @@ class _CameraScreenState extends State {
       // 2
       await controller.takePicture(path);
       // 3
+
+      MLKit classifier = new MLKit();
+     List _tags=  await classifier.detectLabels(path);
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PreviewImageScreen(imagePath: path),
+          builder: (context) => PreviewImageScreen(labeltags: _tags,imagePath: path ),
         ),
       );
     } catch (e) {

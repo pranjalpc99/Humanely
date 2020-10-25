@@ -29,7 +29,7 @@ class MLKit {
   }
 
 
-  Future<List<String>> detectLabels(String imagepath) async {
+  Future<List> detectLabels(String imagepath) async {
     final FirebaseVisionImage visionImage = FirebaseVisionImage.fromFilePath(
         imagepath);
     //FirebaseVision.instance.modelManager().setupModel('<foldername(modelname)>', modelLocation);
@@ -47,13 +47,13 @@ class MLKit {
     final List<ImageLabel> labels = await labeler.processImage(visionImage);
     // final List<ImageLabel> cloudLabels = await cloudLabeler.processImage(visionImage);
 
-    List<String> labeltags;
+    var labeltags =new List();
 
     for (ImageLabel label in labels) {
       final String text = label.text;
       final String entityId = label.entityId;
       final double confidence = label.confidence;
-      labeltags.add(text);
+      labeltags.add(text.toString());
       print("LABELLLL" + text + "     " + confidence.toString());
     }
 

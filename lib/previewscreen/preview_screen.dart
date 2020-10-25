@@ -46,8 +46,8 @@ import 'package:path/path.dart';
 
 class PreviewImageScreen extends StatefulWidget {
   final String imagePath;
-  Future<List<ImageLabel>> labeltags;
-  PreviewImageScreen({this.imagePath});
+  List labeltags;
+  PreviewImageScreen({this.labeltags, this.imagePath});
 
   @override
   _PreviewImageScreenState createState() => _PreviewImageScreenState();
@@ -84,12 +84,12 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           shrinkWrap: true,
           padding: EdgeInsets.only(left: 8.0),
           scrollDirection: Axis.horizontal,
-          itemCount: _tags.length,
+          itemCount: widget.labeltags.length,
           itemBuilder: (BuildContext context, int index) {
             return Row(
               children: <Widget>[
                 ChoiceChip(
-                  label: Text(_tags[index]),
+                  label: Text(widget.labeltags[index]),
                   selected: _defaultTagIndex == index,
                   selectedColor: Colors.blue,
                   onSelected: (bool selected) {
@@ -147,8 +147,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 //print(timestamp);
                 IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: "Andheri",votes: "1");
                 repository.addPost(newPost);
-                MLKit classifier = new MLKit();
-                _tags=  classifier.detectLabels(widget.imagePath) as List<String>;
+                // MLKit classifier = new MLKit();
+                // _tags=  classifier.detectLabels(widget.imagePath) as List<String>;
 
                 Fluttertoast.showToast(msg: "Post Successful",
                     toastLength: Toast.LENGTH_SHORT,
