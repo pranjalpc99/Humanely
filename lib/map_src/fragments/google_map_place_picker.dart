@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Humanely/providers/place_provider.dart';
+import 'package:Humanely/utils/hexcolor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ loc.Location location;
 loc.LocationData currentLocation;
 String _mapStyle;
 Set<Marker> markers = {};
+Set<Circle> circles = {};
 BitmapDescriptor pinLocationIcon;
 bool vis = true;
 
@@ -176,6 +178,14 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
       currentLocation = cLoc;
       final coordinates =
           new Coordinates(currentLocation.latitude, currentLocation.longitude);
+      circles = Set.from([Circle(
+        circleId: CircleId("circle"),
+        center: LatLng(currentLocation.latitude, currentLocation.longitude),
+        radius: 500,
+        fillColor: HexColor("#551c94fe"),
+        strokeWidth: 0,
+        strokeColor: HexColor("#551c94fe")
+      )]);
       var addresses =
           await Geocoder.local.findAddressesFromCoordinates(coordinates);
       var first = addresses.first;
@@ -235,6 +245,7 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
                   myLocationEnabled: true,
                   zoomControlsEnabled: false,
                   markers: markers,
+                  circles: circles,
                   onMapCreated: (GoogleMapController controller) async {
                     // print("map created");
                     String style =

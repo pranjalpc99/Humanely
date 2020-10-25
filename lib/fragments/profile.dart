@@ -8,17 +8,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Humanely/models/user.dart';
 import 'dart:async';
 
+enum Menu { Settings, LogOut }
+
 class Profile extends StatefulWidget {
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
-  String number;
-  String name;
-  int flag = 0;
+  String number="";
+  String name="";
+  String badgesCount="";
+  String friendCount="";
+  String postCount="";
+  int nflag = 0;
+  int bflag = 0;
+  int fflag = 0;
+  int pflag = 0;
 
- /* Future<List<User>> user;
+
+  /* Future<List<User>> user;
   final formKey = new GlobalKey<FormState>();
   var dbHelper;
   bool isUpdating;*/
@@ -40,8 +49,6 @@ class _ProfileState extends State<Profile> {
     getPhoneNumber();
   }
 
-  setUI() {}
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,14 +63,17 @@ class _ProfileState extends State<Profile> {
                   .get()
                   .then((value) {
                 name = value.data['firstName'] + " " + value.data['lastName'];
+                friendCount = value.data['friends'];
+                postCount = value.data['posts'];
+                badgesCount = value.data['badges'];
                 //print("Name now is "+name);
-                if (flag == 0) {
                   setState(() {
                     name = name;
-                    flag = 1;
+                    friendCount = friendCount;
                   });
-                }
+
               });
+
               return Container(
                 margin: EdgeInsets.only(top: 30),
                 child: Row(
@@ -76,7 +86,7 @@ class _ProfileState extends State<Profile> {
                         children: <Widget>[
                           InkWell(
                             onTap: () {
-                             // _signOut();
+                              // _signOut();
                             },
                             child: Card(
                                 color: HexColor("#333333"),
@@ -111,7 +121,7 @@ class _ProfileState extends State<Profile> {
                                       color: HexColor("#D1C4E9"),
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
-                                            BorderRadius.circular(50.0),
+                                        BorderRadius.circular(50.0),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(16.0),
@@ -125,7 +135,7 @@ class _ProfileState extends State<Profile> {
                                     height: 10,
                                   ),
                                   Text(
-                                    "20",
+                                    badgesCount,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 24),
                                   ),
@@ -133,32 +143,37 @@ class _ProfileState extends State<Profile> {
                                     height: 10,
                                   ),
                                   Text(
-                                    "Total",
+                                    "Badges",
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ],
                               ),
                               Column(
                                 children: <Widget>[
-                                  Card(
-                                      color: HexColor("#C8E6C9"),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(50.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Icon(
-                                          Icons.verified_user,
-                                          size: 24,
-                                          color: Colors.green,
+                                  InkWell(
+                                    onTap: (){
+                                      Navigator.push(context, MaterialPageRoute(builder: (context)=> Friend(number, 0)));
+                                    },
+                                    child: Card(
+                                        color: HexColor("#C8E6C9"),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                          BorderRadius.circular(50.0),
                                         ),
-                                      )),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Icon(
+                                            Icons.people_alt,
+                                            size: 24,
+                                            color: Colors.green,
+                                          ),
+                                        )),
+                                  ),
                                   SizedBox(
                                     height: 10,
                                   ),
                                   Text(
-                                    "20",
+                                    friendCount,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 24),
                                   ),
@@ -166,7 +181,7 @@ class _ProfileState extends State<Profile> {
                                     height: 10,
                                   ),
                                   Text(
-                                    "Verified",
+                                    "Friends",
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ],
@@ -177,7 +192,7 @@ class _ProfileState extends State<Profile> {
                                       color: HexColor("#FFE0B2"),
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
-                                            BorderRadius.circular(50.0),
+                                        BorderRadius.circular(50.0),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(16.0),
@@ -191,7 +206,7 @@ class _ProfileState extends State<Profile> {
                                     height: 10,
                                   ),
                                   Text(
-                                    "20",
+                                    postCount,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 24),
                                   ),
@@ -199,7 +214,7 @@ class _ProfileState extends State<Profile> {
                                     height: 10,
                                   ),
                                   Text(
-                                    "Views",
+                                    "Posts",
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ],
@@ -223,51 +238,76 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         leading: Icon(Icons.chevron_left),
         title: Text("Profile"),
-        actions: <Widget>[Icon(Icons.tune)],
+        actions: <Widget>[
+          openPopUpMenu(),
+        ],
       ),
     );
   }
 
+  Widget openPopUpMenu(){
+    return PopupMenuButton<int>(
+      itemBuilder: (context) => [
+        PopupMenuItem(child: Text('Settings'),value: 1,),
+        PopupMenuItem(child: Text('Log Out'),value: 2,),
+      ],
+      icon: Icon(Icons.tune),
+      onSelected: (value){
+        switch(value) {
+          case 1: break;
+          case 2: _signOut();break;
+        }
+      },
+      //offset: Offset(0, 100),
+    );
+  }
+
   Widget _buildInviteBar() {
-    return Padding(
-      padding:
-          const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 32.0, right: 32.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Card(
-              color: HexColor("#333333"),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.share,
-                  size: 18,
-                  color: Colors.green,
+    return InkWell(
+      onTap:() {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Friend(number,2)));
+      },
+      child: Padding(
+        padding:
+        const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 32.0, right: 32.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Card(
+                color: HexColor("#333333"),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50.0),
                 ),
-              )),
-          SizedBox(
-            width: 10,
-          ),
-          Text(
-            "Invite friends",
-            style: TextStyle(color: Colors.green, fontSize: 16),
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Icon(
-                  Icons.chevron_right,
-                  color: Colors.white,
-                ),
-              ],
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.share,
+                    size: 18,
+                    color: Colors.green,
+                  ),
+                )),
+            SizedBox(
+              width: 10,
             ),
-          ),
-        ],
+            Text(
+              "Invite friends",
+              style: TextStyle(color: Colors.green, fontSize: 16),
+            ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -276,7 +316,7 @@ class _ProfileState extends State<Profile> {
     return InkWell(
       onTap: () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Friend()));
+            context, MaterialPageRoute(builder: (context) => Friend(number,1)));
       },
       child: Padding(
         padding: const EdgeInsets.only(

@@ -30,7 +30,6 @@
 
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:Humanely/firebase_ml_kit/FirebaseMl.dart';
 import 'package:Humanely/fragments/explore.dart';
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/models/IncidentPostModel.dart';
@@ -45,6 +44,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:path/path.dart';
 
 class PreviewImageScreen extends StatefulWidget {
@@ -69,6 +69,10 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   String place;
   String votes;
  String description;
+  final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+
+  Position _currentPosition;
+  String _currentAddress;
 
   @override
   void initState() {
@@ -78,8 +82,38 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
       'Accident',
       'Flood'
     ];
-    print("IMAGE PATH" + widget.imagePath);
+    //print("IMAGE PATH" + widget.imagePath);
+    _getCurrentLocation();
+  }
 
+  _getCurrentLocation() {
+    geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+      });
+
+      _getAddressFromLatLng();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> p = await geolocator.placemarkFromCoordinates(
+          _currentPosition.latitude, _currentPosition.longitude);
+
+      Placemark place = p[0];
+
+      setState(() {
+        _currentAddress =
+        "${place.subLocality}, ${place.postalCode}, ${place.country}";
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   Widget choiceChips() {
@@ -141,7 +175,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           Text("New Post"),
           Expanded(
             child: InkWell(
-              onTap: (){
+              onTap: () async {
                 //print("title is: "+title);
                 String dtn = DateTime.now().toString();
                 String d = dtn.substring(0,dtn.indexOf(" "));
@@ -152,10 +186,16 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 int mIndex = int.parse(m);
                 String timestamp = dt + " " +Months().mon[mIndex] +", "+y +" "+t;
                 //print(timestamp);
-                IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: "Andheri",votes: "1");
+                final file = File(widget.imagePath);
+                StorageReference storageReference = FirebaseStorage.instance.ref().child('posts');
+                final StorageUploadTask uploadTask = storageReference.putFile(file);
+                final StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+                final String url = (await downloadUrl.ref.getDownloadURL());
+                print("URL is $url");
+                IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: _currentAddress,votes: "1",image: url);
                 repository.addPost(newPost);
 
-                 uploadPic();
+                 //uploadPic();
                 Fluttertoast.showToast(msg: "Post Successful",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
@@ -223,7 +263,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
-                          hintStyle: TextStyle(color: Colors.white)),
+                          hintStyle: TextStyle(color: Colors.white54)),
                       onChanged: (value) {
                         //print(value);
                         title = value;
@@ -297,42 +337,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   Future<ByteData> getBytesFromFile() async {
     print("IMAGE PATH" + widget.imagePath);
-    Uint8List bytes = File(widget.imagePath).readAsBytesSync() as Uint8List;
+    Uint8List bytes = File(widget.imagePath).readAsBytesSync();
     return ByteData.view(bytes.buffer);
   }
 
-
-  Future uploadPic( ) async{
-    MLKit mlkitlabel= new MLKit();
-    mlkitlabel.classifyImage(widget.imagePath);
-
-   // String fileName = basename(_image.path);
-    Uint8List bytes = File(widget.imagePath).readAsBytesSync() as Uint8List;
-    StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child("trial");
-    StorageUploadTask uploadTask = firebaseStorageRef.putData(bytes);
-    StorageTaskSnapshot taskSnapshot=await uploadTask.onComplete;
-
-    if (taskSnapshot.error == null) {
-      final String downloadUrl =
-      await taskSnapshot.ref.getDownloadURL();
-//      await Firestore.instance
-//          .collection("images")
-//          .add({"url": downloadUrl, "name": imageName});
-//      setState(() {
-//        isLoading = false;
-//      });
-//      final snackBar =
-//      SnackBar(content: Text('Yay! Success'));
-//      Scaffold.of(context).showSnackBar(snackBar);
-    }
-    else {
-    print(
-    'Error from image repo ${taskSnapshot.error.toString()}');
-    throw ('This file is not an image');
-    }
-    setState(() {
-      print("Profile Picture uploaded");
-    });
-
-  }
 }

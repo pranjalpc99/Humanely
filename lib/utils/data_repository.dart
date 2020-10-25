@@ -16,6 +16,7 @@ class DataRepository{
   }
 
   Future<DocumentReference> addPost(IncidentPostModel postModel) {
+    //return postsReference.document().setData(postModel.toJson());
     return postsReference.add(postModel.toJson());
   }
 

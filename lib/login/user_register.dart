@@ -236,12 +236,15 @@ class _UserRegisterState extends State<UserRegister> {
                         Auth.store.collection('Users').document(phoneNumber).setData({
                           'firstName' : firstName,
                           'lastName' : lastName,
-                          'number' : phoneNumber
-                        }).whenComplete(() {
-                          setState(() {
-                            showSpinner = false;
-                          });
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                          'number' : phoneNumber,
+                          'badges': 0.toString(),
+                          'friends' :0.toString(),
+                          'posts': 0.toString()
+                        }).then((value) {
+                            setState(() {
+                              showSpinner = false;
+                            });
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
                         });
                       },
                       child: Padding(

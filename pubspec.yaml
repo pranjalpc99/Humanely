@@ -34,6 +34,7 @@ dependencies:
   tuple: ^1.0.3
   geocoder: ^0.2.1
   animated_bottom_navigation_bar: ^0.1.2+2
+  cached_network_image: ^2.3.3
   chips_choice: ^1.2.0
   camera: ^0.5.2+1
   path_provider: ^1.1.0
@@ -44,12 +45,6 @@ dependencies:
   flutter_displaymode: ^0.1.0
   contacts_service: ^0.4.6
   firebase_storage:
-#firebase_ml_vision:
-  #firebase_ml_vision:
-  tflite:
-  firebase_mlvision:
-    git:
-      url: git://github.com/rishab2113/firebase_mlvision.git
 
 
 dev_dependencies:

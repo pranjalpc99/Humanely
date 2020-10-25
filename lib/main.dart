@@ -28,7 +28,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
 
-  List<DisplayMode> modes = <DisplayMode>[];
+  /*List<DisplayMode> modes = <DisplayMode>[];
 
   DisplayMode selected;
 
@@ -60,18 +60,18 @@ class _MyAppState extends State<MyApp> {
     if (mounted) {
       setState(() {});
     }
-  }
+  }*/
 
-  Future<DisplayMode> getCurrentMode() async {
+/*  Future<DisplayMode> getCurrentMode() async {
     return await FlutterDisplayMode.current;
-  }
+  }*/
 
-  @override
+  /*@override
   void initState() {
     // TODO: implement initState
     super.initState();
     fetchModes();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
