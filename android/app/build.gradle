@@ -44,6 +44,10 @@ android {
         multiDexEnabled true
     }
 
+    aaptOptions {
+        noCompress "tflite"
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
@@ -65,4 +69,6 @@ flutter {
 dependencies {
     implementation 'com.google.firebase:firebase-analytics:17.5.0'
     implementation 'com.google.firebase:firebase-crashlytics:17.2.1'
+  //  implementation 'com.google.firebase:firebase-ml-vision:24.0.1'
+  //  implementation 'com.google.firebase:firebase-ml-vision-image-label-model:19.0.0'
 }
