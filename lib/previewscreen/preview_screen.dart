@@ -39,13 +39,14 @@ import 'package:Humanely/utils/app_theme.dart';
 import 'package:Humanely/utils/data_repository.dart';
 import 'package:Humanely/utils/months.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 
 class PreviewImageScreen extends StatefulWidget {
   final String imagePath;
-
+  Future<List<ImageLabel>> labeltags;
   PreviewImageScreen({this.imagePath});
 
   @override
@@ -147,7 +148,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: "Andheri",votes: "1");
                 repository.addPost(newPost);
                 MLKit classifier = new MLKit();
-                classifier.classifyImage(widget.imagePath);
+                _tags=  classifier.detectLabels(widget.imagePath) as List<String>;
+
                 Fluttertoast.showToast(msg: "Post Successful",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,

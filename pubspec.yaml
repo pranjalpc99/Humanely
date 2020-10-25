@@ -43,7 +43,8 @@ dependencies:
   sqflite: any
   flutter_displaymode: ^0.1.0
   contacts_service: ^0.4.6
-  tflite: ^1.1.1
+  tflite:
+  firebase_ml_vision: ^0.9.7
 
 
 dev_dependencies:
@@ -56,9 +57,9 @@ flutter:
   assets:
     - assets/map/
     - assets/images/
-    - assets/emergency_model/
-    - assets/model.tflite/
-    - assets/dict.txt/
+    - assets/emergencymodel/
+#    - assets/model.tflite/
+#    - assets/dict.txt/
   fonts:
     - family: Poppins
       fonts:

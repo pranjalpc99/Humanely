@@ -54,6 +54,10 @@
             android:value="2" />
 
         <meta-data
+            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+            android:value="label" />
+
+        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyD57EAZGbSWvKpB1Zik8ZA-Gb4FyGkIb0Q"/>
 
