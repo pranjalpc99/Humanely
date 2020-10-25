@@ -1,4 +1,4 @@
-import 'package:Humanely/friends/friend.dart';
+import 'package:Humanely/screens/friend.dart';
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/utils/auth.dart';
 import 'package:Humanely/utils/hexcolor.dart';

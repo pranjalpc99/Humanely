@@ -40,7 +40,7 @@ class _ExploreState extends State<Explore> {
       child: ScrollConfiguration(
         behavior: MyBehavior(),
         child: ListView.builder(
-          shrinkWrap: true,
+          //shrinkWrap: true,
           padding: EdgeInsets.only(left: 8.0),
           scrollDirection: Axis.horizontal,
           itemCount: _choices.length,
@@ -118,7 +118,7 @@ class _ExploreState extends State<Explore> {
                 flex: 7,
                 child: ListView.builder(
                     scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
+                    //shrinkWrap: true,
                     itemCount: postlist.length,
                     itemBuilder: (context, index) {
                       //print("DATAAAAAAAAAAA");
