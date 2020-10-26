@@ -1,4 +1,3 @@
-
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/utils/app_theme.dart';
 import 'package:Humanely/utils/credentials.dart';
@@ -97,6 +96,16 @@ class _MyAppState extends State<MyApp> {
 
       onResume: (Map<String, dynamic> message) async {
         print('init called onResume');
+        showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  content: ListTile(
+                    subtitle: Text('onresume'),
+                  ),
+                  actions: [
+                    FlatButton(onPressed: ()=> Navigator.of(context).pop(), child: Text('Ok')),
+                  ],
+                ));
       },
     );
   }
@@ -151,15 +160,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: 500.0,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage(
-                        'assets/images/earth.png'),
+                    image: AssetImage('assets/images/earth.png'),
                     fit: BoxFit.fill,
                   ),
                 ),
               ),
             ),
             Align(
-              alignment: Alignment(0.0,-0.1),
+              alignment: Alignment(0.0, -0.1),
               child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(50.0),
@@ -178,11 +186,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   child: InkWell(
-                    onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context) => OTPPage(false,"")));},
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OTPPage(false, "")));
+                    },
                     child: Ink(
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                          color: Colors.blue,
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Colors.blue,
 //                          gradient: LinearGradient(colors: [
 //                            Color(0xFF2B79E6),
 //                            Color(0xFF7CB4FF)
@@ -190,10 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(
-                            left: 50.0,
-                            top: 10.0,
-                            right: 50.0,
-                            bottom: 10.0),
+                            left: 50.0, top: 10.0, right: 50.0, bottom: 10.0),
                         child: Text(
                           'ALLOW',
                           style: TextStyle(
@@ -227,8 +237,8 @@ class _MyHomePageState extends State<MyHomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Padding(
-                  padding:
-                  const EdgeInsets.only(top: 50.0, bottom: 20.0, left: 20.0),
+                  padding: const EdgeInsets.only(
+                      top: 50.0, bottom: 20.0, left: 20.0),
                   child: SizedBox(
                     width: 300.0,
                     child: Text(
