@@ -187,7 +187,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 String timestamp = dt + " " +Months().mon[mIndex] +", "+y +" "+t;
                 //print(timestamp);
                 final file = File(widget.imagePath);
-                StorageReference storageReference = FirebaseStorage.instance.ref().child('posts');
+                String n = basename(widget.imagePath);
+                StorageReference storageReference = FirebaseStorage.instance.ref().child(n);
                 final StorageUploadTask uploadTask = storageReference.putFile(file);
                 final StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
                 final String url = (await downloadUrl.ref.getDownloadURL());
