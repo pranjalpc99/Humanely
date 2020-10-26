@@ -20,6 +20,7 @@ dependencies:
   #  cloud_firestore: ^0.14.0+2
   #  firebase_auth: ^0.16.1
   firebase_crashlytics: ^0.1.4+1
+  firebase_messaging:
   permission_handler: ^5.0.1
   shared_preferences: ^0.5.7+3
   flutter_screenutil: ^2.1.0

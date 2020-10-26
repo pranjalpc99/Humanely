@@ -2,7 +2,10 @@
 import 'package:Humanely/home_page.dart';
 import 'package:Humanely/utils/app_theme.dart';
 import 'package:Humanely/utils/credentials.dart';
+import 'package:Humanely/utils/data_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +30,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  final _firestore = Firestore.instance;
+  final key = GlobalKey<ScaffoldState>();
 
   /*List<DisplayMode> modes = <DisplayMode>[];
 
@@ -66,12 +72,44 @@ class _MyAppState extends State<MyApp> {
     return await FlutterDisplayMode.current;
   }*/
 
-  /*@override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchModes();
-  }*/
+    firebaseMessaging.getToken().then((token) {
+      saveTokens(token);
+    });
+    firebaseMessaging.configure(
+      //called when app is in foreground
+      onMessage: (Map<String, dynamic> message) async {
+        print('init called onMessage');
+        final snackBar = SnackBar(
+          content: Text(message['notification']['body']),
+          action: SnackBarAction(label: 'GO', onPressed: () {}),
+        );
+        key.currentState.showSnackBar(snackBar);
+      },
+      //called when app is completely closed and open from push notification
+      onLaunch: (Map<String, dynamic> message) async {
+        print('init called onLaunch');
+      },
+      //called when app is in background  and open from push notification
+
+      onResume: (Map<String, dynamic> message) async {
+        print('init called onResume');
+      },
+    );
+  }
+
+  Future<void> saveTokens(var token) async {
+    try {
+      await _firestore.collection('tokens').add({
+        'token': token,
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
