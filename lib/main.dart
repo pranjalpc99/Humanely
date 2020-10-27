@@ -75,9 +75,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    firebaseMessaging.getToken().then((token) {
-      saveTokens(token);
-    });
+    // firebaseMessaging.getToken().then((token) {
+    //   saveTokens(token);
+    // });
+    firebaseMessaging.subscribeToTopic('notification');
     firebaseMessaging.configure(
       //called when app is in foreground
       onMessage: (Map<String, dynamic> message) async {
@@ -96,16 +97,6 @@ class _MyAppState extends State<MyApp> {
 
       onResume: (Map<String, dynamic> message) async {
         print('init called onResume');
-        showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                  content: ListTile(
-                    subtitle: Text('onresume'),
-                  ),
-                  actions: [
-                    FlatButton(onPressed: ()=> Navigator.of(context).pop(), child: Text('Ok')),
-                  ],
-                ));
       },
     );
   }
