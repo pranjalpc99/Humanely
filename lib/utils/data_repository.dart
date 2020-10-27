@@ -17,9 +17,9 @@ class DataRepository{
     return usersReference.snapshots();
   }
 
-  Future<DocumentReference> addPost(IncidentPostModel postModel) {
-    //return postsReference.document().setData(postModel.toJson());
-    return postsReference.add(postModel.toJson());
+  Future<DocumentReference> addPost(IncidentPostModel postModel,String count) {
+    return postsReference.document(count).setData(postModel.toJson());
+    //return postsReference.add(postModel.toJson());
   }
 
 //  Future uploadPic( ) async{

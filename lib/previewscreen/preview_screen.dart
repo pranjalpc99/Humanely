@@ -36,6 +36,7 @@ import 'package:Humanely/home_page.dart';
 import 'package:Humanely/models/IncidentPostModel.dart';
 import 'package:Humanely/models/scroll_behaviour.dart';
 import 'package:Humanely/utils/app_theme.dart';
+import 'package:Humanely/utils/auth.dart';
 import 'package:Humanely/utils/data_repository.dart';
 import 'package:Humanely/utils/months.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,7 +48,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PreviewImageScreen extends StatefulWidget {
   final String imagePath;
@@ -61,6 +64,7 @@ class PreviewImageScreen extends StatefulWidget {
 class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   final DataRepository repository = DataRepository();
+  bool showSpinner = false;
 
   List<String> _tags;
   int _defaultTagIndex;
@@ -73,6 +77,10 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   Position _currentPosition;
   String _currentAddress;
+  String number="";
+  String name='';
+  String count="";
+  String mypost="";
 
   @override
   void initState() {
@@ -84,6 +92,26 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     ];
     //print("IMAGE PATH" + widget.imagePath);
     _getCurrentLocation();
+    getPhoneNumber();
+    getCountOfPost();
+  }
+
+  getCountOfPost(){
+    Firestore.instance
+        .collection('numOfPosts')
+        .document('countOfPost')
+        .get()
+        .then((value) {
+          count = value.data['count'];
+          //int i = int.parse(count);
+          //count = i.toString();
+        });
+  }
+
+  Future<bool> getPhoneNumber() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    number = preferences.getString("phoneNumber");
+    return number == null;
   }
 
   _getCurrentLocation() {
@@ -176,6 +204,9 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           Expanded(
             child: InkWell(
               onTap: () async {
+                setState(() {
+                  showSpinner = true;
+                });
                 //print("title is: "+title);
                 String dtn = DateTime.now().toString();
                 String d = dtn.substring(0,dtn.indexOf(" "));
@@ -193,8 +224,17 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 final StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
                 final String url = (await downloadUrl.ref.getDownloadURL());
                 print("URL is $url");
-                IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,timestamp: timestamp,place: _currentAddress,votes: "1",image: url);
-                repository.addPost(newPost);
+                IncidentPostModel newPost = IncidentPostModel(title: title,id: dtn,postnum: count,timestamp: timestamp,place: _currentAddress,upvotes: "0",downvotes: "0",uploader: name,image: url);
+                //repository.addPost(newPost,count);
+                Firestore.instance.collection("posts").document(count).setData(newPost.toJson());
+                int i = int.parse(count)+1;
+                Auth.store.collection('numOfPosts').document('countOfPost').updateData({
+                  'count': i.toString(),
+                });
+                int p = int.parse(mypost) + 1;
+                Auth.store.collection('Users').document(number).updateData({
+                  'posts': p.toString(),
+                });
                 // MLKit classifier = new MLKit();
                 // _tags=  classifier.detectLabels(widget.imagePath) as List<String>;
 
@@ -233,90 +273,105 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           backgroundColor: Colors.transparent,
           automaticallyImplyLeading: false,
         ),
-        body: Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                children: <Widget>[
-                  SizedBox(
-                    width: 20,
-                  ),
-                  ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image.file(
-                        File(widget.imagePath),
-                        fit: BoxFit.fill,
-                        height: MediaQuery.of(context).size.height / 5,
-                        width: MediaQuery.of(context).size.width / 5,
-                      )),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.white,
-                          fontSize: 18,
+        body: FutureBuilder(
+          future: getPhoneNumber(),
+          builder: (buildContext, snapshot) {
+            if(snapshot.hasData){
+              Firestore.instance
+                  .collection('Users')
+                  .document(number)
+                  .get()
+                  .then((value) {
+                    name = value.data['firstName'] + " " + value.data['lastName'];
+                    mypost = value.data['posts'];
+                  });
+              return ModalProgressHUD(
+                inAsyncCall: showSpinner,
+                color: Colors.blue,
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 10,
                       ),
-                      decoration: InputDecoration(
-                          hintText: "Title",
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue),
+                      Row(
+                        children: <Widget>[
+                          SizedBox(
+                            width: 20,
                           ),
-                          hintStyle: TextStyle(color: Colors.white54)),
-                      onChanged: (value) {
-                        //print(value);
-                        title = value;
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.0),
-              Padding(
-                padding: const EdgeInsets.only(left:20.0),
+                          ClipRRect(
+                              borderRadius: BorderRadius.circular(5),
+                              child: Image.file(
+                                File(widget.imagePath),
+                                fit: BoxFit.fill,
+                                height: MediaQuery.of(context).size.height / 5,
+                                width: MediaQuery.of(context).size.width / 5,
+                              )),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                              decoration: InputDecoration(
+                                  hintText: "Title",
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.blue),
+                                  ),
+                                  hintStyle: TextStyle(color: Colors.white54)),
+                              onChanged: (value) {
+                                //print(value);
+                                title = value;
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.0),
+                      Padding(
+                        padding: const EdgeInsets.only(left:20.0),
 //                child: Text(
 //                  "Add Description",
 //                  style: TextStyle(color: Colors.white,
 //                  fontSize: 18),
 //                ),
-              child:  TextField(
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
-                decoration: InputDecoration(
-                    hintText: "Add Description",
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                    hintStyle: TextStyle(color: Colors.white)),
-                onChanged: (value) {
-                  //print(value);
-                  description  = value;
-                },
-              ),
+                        child:  TextField(
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                          decoration: InputDecoration(
+                              hintText: "Add Description",
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.blue),
+                              ),
+                              hintStyle: TextStyle(color: Colors.white)),
+                          onChanged: (value) {
+                            //print(value);
+                            description  = value;
+                          },
+                        ),
 
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left:20.0),
-                child: Text(
-                  "Add Tags",
-                  style: TextStyle(color: Colors.white,fontSize: 18),
-                ),
-              ),
-              choiceChips(),
-              Spacer(flex: 3,),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left:20.0),
+                        child: Text(
+                          "Add Tags",
+                          style: TextStyle(color: Colors.white,fontSize: 18),
+                        ),
+                      ),
+                      choiceChips(),
+                      Spacer(flex: 3,),
 //              Flexible(
 //                flex: 1,
 //                child: Container(
@@ -332,8 +387,14 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 //                  ),
 //                ),
 //              ),
-            ],
-          ),
+                    ],
+                  ),
+                ),
+              );
+            }
+           return CircularProgressIndicator();
+          },
+
         ),
       ),
     );

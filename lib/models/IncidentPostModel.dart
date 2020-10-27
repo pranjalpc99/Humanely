@@ -5,13 +5,16 @@ class IncidentPostModel {
   String timestamp;
   String title;
   String place;
-  String votes;
+  String upvotes;
+  String downvotes;
+  String uploader;
   String id;
   String image;
+  String postnum;
 
   DocumentReference reference;
 
-  IncidentPostModel({this.title,this.id,this.timestamp,this.place,this.votes,this.image});
+  IncidentPostModel({this.title,this.id,this.postnum,this.timestamp,this.place,this.upvotes,this.downvotes,this.uploader,this.image});
 
   factory IncidentPostModel.fromSnapshot(DocumentSnapshot snapshot) {
     IncidentPostModel newPost = IncidentPostModel.fromJson(snapshot.data);
@@ -69,9 +72,12 @@ IncidentPostModel _PostFromJson(Map<String,dynamic> json){
   return IncidentPostModel(
     title: json['title'] as String,
     id: json['id'] as String,
+    postnum: json['postnum'] as String,
     timestamp: json['timestamp'] as String,
     place: json['place'] as String,
-    votes: json['votes'] as String,
+    upvotes: json['upvotes'] as String,
+    downvotes: json['downvotes'] as String,
+    uploader: json['uploader'] as String,
     image: json['image'] as String
   );
 }
@@ -79,8 +85,11 @@ IncidentPostModel _PostFromJson(Map<String,dynamic> json){
 Map<String, dynamic> _PostToJson(IncidentPostModel instance) => <String, dynamic> {
   'title': instance.title,
   'id': instance.id,
+  'postnum': instance.postnum,
   'timestamp': instance.timestamp,
   'place': instance.place,
-  'votes': instance.votes,
+  'upvotes': instance.upvotes,
+  'downvotes': instance.downvotes,
+  'uploader': instance.uploader,
   'image' :instance.image
 };
