@@ -114,6 +114,9 @@ class _ExploreState extends State<Explore> {
                 child: Center(child: CircularProgressIndicator()),);
             }
             else {
+              if(postlist.length==0){
+                return Expanded(flex:7,child: Center(child: Text("No Posts",style: TextStyle(color: Colors.white),),));
+              }
               return Expanded(
                 flex: 7,
                 child: ListView.builder(
